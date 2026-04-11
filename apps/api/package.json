@@ -6,5 +6,9 @@
     "dev": "node ./src/index.js",
     "build": "node -e \"console.log('API scaffold has no build step yet')\"",
     "lint": "node -e \"console.log('API scaffold has no lint step yet')\""
+  },
+  "dependencies": {
+    "@srijanai/db": "*",
+    "drizzle-orm": "^0.44.5"
   }
 }
