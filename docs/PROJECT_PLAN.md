@@ -2,9 +2,9 @@
 
 ## Project Status
 - Last updated: 2026-04-11
-- Current phase: Planning
-- Current focus: Web-first monorepo foundation
-- Progress summary: Project documentation initialized. Implementation has not started yet.
+- Current phase: Foundation
+- Current focus: Web-first monorepo and landing page scaffold
+- Progress summary: Project documentation, monorepo root, and initial Next.js web scaffold are in place. Production build verification is passing.
 
 ## Product Vision
 SrijanAI is an AI-powered content planning and generation platform for creators and small brands who lose time every month planning posts, writing captions, adapting content for platforms, and maintaining consistency.
@@ -410,14 +410,18 @@ Before a task is considered complete:
 ## Progress Log
 ### Completed
 - 2026-04-11: Initialized living project plan document
+- 2026-04-11: Set up web-first monorepo root with workspace configuration
+- 2026-04-11: Scaffolded initial Next.js web app in `apps/web`
+- 2026-04-11: Added first landing page shell for SrijanAI
+- 2026-04-11: Verified production build for the initial web scaffold
 
 ### In Progress
-- Define web-first monorepo foundation
+- Prepare landing page refinement and authentication foundation
 
 ### Next Up
-- Initialize monorepo structure
-- Scaffold landing page
+- Refine homepage sections and navigation
 - Add authentication foundation
+- Add About, Guide, Privacy Policy, and Terms pages
 
 ## Open Decisions
 These should be finalized as we move into implementation:
@@ -435,3 +439,9 @@ This repository will be built incrementally with:
 - granular commits
 - regular pushes to GitHub
 - progress tracked in this file as features are completed
+
+## Implementation Notes
+- Root workspace uses npm workspaces for a web-first monorepo foundation.
+- The initial web app is built with Next.js App Router and TypeScript.
+- A repo-local `.npmrc` overrides the global npm script shell to use `cmd.exe`, which avoids Windows build issues caused by a Git Bash `script-shell` override.
+- Initial dependency installation was slowed by npm registry connection resets and long package metadata fetch times; the current lockfile and installed dependencies are now in a working state.

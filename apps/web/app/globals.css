@@ -1,0 +1,269 @@
+:root {
+  color-scheme: dark;
+  --bg: #08111f;
+  --bg-soft: #0f1a2d;
+  --panel: rgba(15, 26, 45, 0.75);
+  --panel-strong: rgba(22, 37, 63, 0.92);
+  --line: rgba(151, 182, 255, 0.14);
+  --text: #eef4ff;
+  --muted: #a6b5d4;
+  --accent: #79f0d0;
+  --accent-strong: #53d8ff;
+  --glow: rgba(83, 216, 255, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(83, 216, 255, 0.18), transparent 30%),
+    radial-gradient(circle at top right, rgba(121, 240, 208, 0.14), transparent 28%),
+    linear-gradient(180deg, #07101d 0%, #091626 46%, #06111e 100%);
+  color: var(--text);
+  font-family: "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-shell {
+  width: min(1160px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 4rem 0 5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2rem;
+  align-items: center;
+  min-height: 72vh;
+}
+
+.eyebrow,
+.section-label {
+  margin: 0 0 0.85rem;
+  font-size: 0.84rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1,
+.content-card h2,
+.roadmap-section h2 {
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.hero h1 {
+  font-size: clamp(3.4rem, 7vw, 6.4rem);
+  max-width: 9ch;
+}
+
+.hero-text,
+.roadmap-section p,
+.content-card li {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.hero-text {
+  max-width: 58ch;
+  font-size: 1.05rem;
+  margin: 1.25rem 0 0;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.8rem;
+}
+
+.primary-button,
+.secondary-button {
+  border-radius: 999px;
+  padding: 0.95rem 1.3rem;
+  font-weight: 600;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #04121d;
+  box-shadow: 0 16px 50px rgba(83, 216, 255, 0.22);
+}
+
+.secondary-button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-2px);
+}
+
+.hero-card,
+.content-card,
+.roadmap-section {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+}
+
+.hero-card {
+  min-height: 520px;
+  padding: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(20px);
+}
+
+.orb-one {
+  inset: 12% auto auto 8%;
+  width: 160px;
+  height: 160px;
+  background: rgba(83, 216, 255, 0.18);
+}
+
+.orb-two {
+  inset: auto 8% 8% auto;
+  width: 220px;
+  height: 220px;
+  background: rgba(121, 240, 208, 0.12);
+}
+
+.calendar-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  border-radius: 24px;
+  padding: 1.25rem;
+  background: var(--panel-strong);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.28);
+}
+
+.calendar-header,
+.calendar-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.calendar-day {
+  display: grid;
+  place-items: center;
+  min-height: 76px;
+  border-radius: 18px;
+  border: 1px solid rgba(121, 240, 208, 0.2);
+  background: rgba(121, 240, 208, 0.08);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.calendar-day.is-active {
+  box-shadow: inset 0 0 0 1px rgba(121, 240, 208, 0.3), 0 0 30px var(--glow);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.content-card,
+.roadmap-section {
+  padding: 2rem;
+}
+
+.content-card ul {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.accent-card {
+  background:
+    linear-gradient(180deg, rgba(15, 26, 45, 0.86), rgba(11, 22, 38, 0.95)),
+    radial-gradient(circle at top, rgba(83, 216, 255, 0.14), transparent 50%);
+}
+
+.roadmap-section {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 920px) {
+  .hero,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: auto;
+    padding-top: 1rem;
+  }
+
+  .hero h1 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 1.2rem, 1160px);
+    padding: 1.25rem 0 3rem;
+  }
+
+  .hero-card,
+  .content-card,
+  .roadmap-section {
+    border-radius: 22px;
+  }
+
+  .content-card,
+  .roadmap-section,
+  .calendar-panel {
+    padding: 1.15rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.6rem, 15vw, 4rem);
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
