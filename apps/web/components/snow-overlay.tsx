@@ -48,9 +48,14 @@ export function SnowOverlay() {
       return;
     }
 
+<<<<<<< HEAD
     const canvasEl: HTMLCanvasElement = canvas;
     const ctx: CanvasRenderingContext2D = context;
 
+=======
+    const snowCanvas = canvas;
+    const snowContext = context;
+>>>>>>> a915d87fa084a97257b9587002f8c3344498ee2e
     let animationFrame = 0;
     let stars: Star[] = [];
     let width = 0;
@@ -67,6 +72,7 @@ export function SnowOverlay() {
       height = window.innerHeight;
       dpr = window.devicePixelRatio || 1;
 
+<<<<<<< HEAD
       canvasEl.width = Math.floor(width * dpr);
       canvasEl.height = Math.floor(height * dpr);
       canvasEl.style.width = `${width}px`;
@@ -74,6 +80,15 @@ export function SnowOverlay() {
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
+=======
+      snowCanvas.width = Math.floor(width * dpr);
+      snowCanvas.height = Math.floor(height * dpr);
+      snowCanvas.style.width = `${width}px`;
+      snowCanvas.style.height = `${height}px`;
+
+      snowContext.setTransform(1, 0, 0, 1, 0, 0);
+      snowContext.scale(dpr, dpr);
+>>>>>>> a915d87fa084a97257b9587002f8c3344498ee2e
 
       stars = Array.from({ length: getStarCount() }, () => createStar(width, height));
     }
@@ -156,6 +171,7 @@ export function SnowOverlay() {
         recycleStar(star);
       }
 
+<<<<<<< HEAD
       ctx.beginPath();
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(230, 247, 255, ${star.alpha})`;
@@ -179,6 +195,29 @@ export function SnowOverlay() {
       drawBackground();
       stars.forEach(drawStar);
       ctx.shadowBlur = 0;
+=======
+      snowContext.beginPath();
+      snowContext.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+      snowContext.fillStyle = `rgba(215, 245, 255, ${particle.alpha})`;
+      snowContext.shadowBlur = particle.radius * 6;
+      snowContext.shadowColor = "rgba(125, 205, 255, 0.9)";
+      snowContext.fill();
+    }
+
+    function render() {
+      const gradient = snowContext.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, "#03192f");
+      gradient.addColorStop(0.55, "#08294a");
+      gradient.addColorStop(1, "#04111f");
+
+      snowContext.clearRect(0, 0, width, height);
+      snowContext.fillStyle = gradient;
+      snowContext.fillRect(0, 0, width, height);
+
+      particles.forEach(drawParticle);
+      snowContext.shadowBlur = 0;
+
+>>>>>>> a915d87fa084a97257b9587002f8c3344498ee2e
       animationFrame = window.requestAnimationFrame(render);
     }
 

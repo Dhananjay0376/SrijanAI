@@ -20,7 +20,7 @@ export function AppProvider({ children }: AppProviderProps) {
           colorInputText: "#eef4ff",
           colorText: "#eef4ff",
           colorTextSecondary: "#a6b5d4",
-          borderRadius: "18px",
+          borderRadius: "8px",
         },
       }}
     >
