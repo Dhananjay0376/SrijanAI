@@ -1,7 +1,15 @@
 const http = require("node:http");
 const { healthHandler } = require("./modules/health");
-const { createProfile } = require("./modules/creator-profile");
-const { createCalendar } = require("./modules/calendar");
+const {
+  createProfile,
+  getProfile,
+  listProfilesByUser,
+} = require("./modules/creator-profile");
+const {
+  createCalendar,
+  getCalendar,
+  listCalendarsByUser,
+} = require("./modules/calendar");
 const { notFoundHandler } = require("./modules/not-found");
 const { parseJsonBody, sendError, sendJson } = require("./lib/http");
 const {
@@ -31,6 +39,30 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.method === "GET" && req.url.startsWith("/profiles")) {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const profileId = url.searchParams.get("id");
+    const userId = url.searchParams.get("userId");
+
+    if (profileId) {
+      const profile = getProfile(profileId);
+      if (!profile) {
+        sendError(res, 404, "Profile not found");
+        return;
+      }
+      sendJson(res, 200, profile);
+      return;
+    }
+
+    if (userId) {
+      sendJson(res, 200, listProfilesByUser(userId));
+      return;
+    }
+
+    sendError(res, 400, "Provide id or userId to fetch profiles");
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/calendars") {
     parseJsonBody(req)
       .then((input) => {
@@ -45,6 +77,30 @@ const server = http.createServer((req, res) => {
       .catch(() => {
         sendError(res, 400, "Invalid JSON body");
       });
+    return;
+  }
+
+  if (req.method === "GET" && req.url.startsWith("/calendars")) {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const calendarId = url.searchParams.get("id");
+    const userId = url.searchParams.get("userId");
+
+    if (calendarId) {
+      const calendar = getCalendar(calendarId);
+      if (!calendar) {
+        sendError(res, 404, "Calendar not found");
+        return;
+      }
+      sendJson(res, 200, calendar);
+      return;
+    }
+
+    if (userId) {
+      sendJson(res, 200, listCalendarsByUser(userId));
+      return;
+    }
+
+    sendError(res, 400, "Provide id or userId to fetch calendars");
     return;
   }
 
