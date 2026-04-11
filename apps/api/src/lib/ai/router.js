@@ -23,9 +23,12 @@ function buildRetryPrompt(taskName, input) {
 
 async function runWithFallback(taskName, input) {
   let lastError = null;
+  const startTime = Date.now();
+  let attempts = 0;
 
   for (const provider of providers) {
     try {
+      attempts += 1;
       if (taskName === "monthly") {
         let result = await provider.generateMonthlyTitles(input);
         let guard = validateMonthlyResult(result, input.selectedDays?.length);
@@ -39,7 +42,14 @@ async function runWithFallback(taskName, input) {
         if (!guard.ok) {
           throw new Error(guard.error);
         }
-        return result;
+        return {
+          ...result,
+          meta: {
+            provider: result.provider,
+            attempts,
+            durationMs: Date.now() - startTime,
+          },
+        };
       }
       if (taskName === "post") {
         let result = await provider.generatePost(input);
@@ -54,7 +64,14 @@ async function runWithFallback(taskName, input) {
         if (!guard.ok) {
           throw new Error(guard.error);
         }
-        return result;
+        return {
+          ...result,
+          meta: {
+            provider: result.provider,
+            attempts,
+            durationMs: Date.now() - startTime,
+          },
+        };
       }
     } catch (error) {
       lastError = error;

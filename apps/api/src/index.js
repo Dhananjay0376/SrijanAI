@@ -13,6 +13,7 @@ const {
 const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
 const { parseJsonBody, sendError, sendJson } = require("./lib/http");
+const { logEvent } = require("./lib/logger");
 const { generateMonthlyTitles, generatePost } = require("./lib/ai/router");
 const {
   validateCreatorProfile,
@@ -160,6 +161,11 @@ const server = http.createServer((req, res) => {
         }
         try {
           const result = await generateMonthlyTitles(input);
+          logEvent("generation.monthly", {
+            provider: result.meta?.provider,
+            attempts: result.meta?.attempts,
+            durationMs: result.meta?.durationMs,
+          });
           sendJson(res, 200, result);
         } catch (error) {
           sendError(res, 502, "Generation failed", error.message);
@@ -181,6 +187,11 @@ const server = http.createServer((req, res) => {
         }
         try {
           const result = await generatePost(input);
+          logEvent("generation.post", {
+            provider: result.meta?.provider,
+            attempts: result.meta?.attempts,
+            durationMs: result.meta?.durationMs,
+          });
           sendJson(res, 200, result);
         } catch (error) {
           sendError(res, 502, "Generation failed", error.message);
