@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { hasClerkEnv } from "@/lib/auth";
+import { hasClerkEnv } from "../../lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -44,4 +44,3 @@ export default async function DashboardPage() {
     </main>
   );
 }
-

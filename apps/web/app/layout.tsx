@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { AppProvider } from "@/components/app-provider";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { AppProvider } from "../components/app-provider";
+import { SiteFooter } from "../components/site-footer";
+import { SiteHeader } from "../components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {

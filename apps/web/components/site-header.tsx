@@ -1,4 +1,11 @@
+import {
+  Show,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
+import { hasClerkPublishableKey } from "../lib/auth";
 
 const navigationItems = [
   { href: "/", label: "Home" },
@@ -24,14 +31,37 @@ export function SiteHeader() {
       </nav>
 
       <div className="site-actions">
-        <Link className="nav-link-button" href="/sign-in">
-          Sign in
-        </Link>
-        <Link className="nav-primary-button" href="/sign-up">
-          Start free
-        </Link>
+        {hasClerkPublishableKey ? (
+          <>
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button className="nav-link-button" type="button">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="nav-primary-button" type="button">
+                  Start free
+                </button>
+              </SignUpButton>
+            </Show>
+            <Show when="signed-in">
+              <div className="user-button-shell">
+                <UserButton />
+              </div>
+            </Show>
+          </>
+        ) : (
+          <>
+            <Link className="nav-link-button" href="/sign-in">
+              Sign in
+            </Link>
+            <Link className="nav-primary-button" href="/sign-up">
+              Start free
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );
 }
-

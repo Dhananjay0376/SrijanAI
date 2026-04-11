@@ -1,6 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
-import { ConfigurationNotice } from "@/components/auth/configuration-notice";
-import { hasClerkEnv } from "@/lib/auth";
+import { ConfigurationNotice } from "../../../components/auth/configuration-notice";
+import { hasClerkEnv } from "../../../lib/auth";
 
 export default function SignInPage() {
   if (!hasClerkEnv) {
@@ -18,4 +18,3 @@ export default function SignInPage() {
     </section>
   );
 }
-

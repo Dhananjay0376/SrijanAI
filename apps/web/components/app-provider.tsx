@@ -1,5 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import { hasClerkEnv } from "@/lib/auth";
+import { hasClerkEnv } from "../lib/auth";
 
 type AppProviderProps = Readonly<{
   children: React.ReactNode;
@@ -28,4 +28,3 @@ export function AppProvider({ children }: AppProviderProps) {
     </ClerkProvider>
   );
 }
-

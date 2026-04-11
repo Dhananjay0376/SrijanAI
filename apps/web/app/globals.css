@@ -98,12 +98,22 @@ a {
   border-radius: 999px;
   padding: 0.8rem 1.1rem;
   border: 1px solid transparent;
+  font: inherit;
+  cursor: pointer;
 }
 
 .nav-primary-button {
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   color: #04121d;
   font-weight: 700;
+}
+
+.user-button-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .hero {
