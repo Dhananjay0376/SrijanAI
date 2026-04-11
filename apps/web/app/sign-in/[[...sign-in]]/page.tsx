@@ -22,7 +22,13 @@ export default async function SignInPage() {
   }
 
   return (
-    <section className="login-shell">
+    <main className="landing-shell login-page-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`comet comet-${i + 1}`} />
+        ))}
+      </div>
+      <section className="login-shell">
       <div className="login-copy">
         <p className="section-label">Creator workspace</p>
         <h1>Sign in and pick up the next content sprint.</h1>
@@ -54,6 +60,7 @@ export default async function SignInPage() {
           New to SrijanAI? <Link href="/sign-up">Create an account</Link>
         </p>
       </div>
-    </section>
+      </section>
+    </main>
   );
 }

@@ -21,8 +21,15 @@ export default async function SignUpPage() {
   }
 
   return (
-    <section className="auth-shell">
-      <SignUp />
-    </section>
+    <main className="landing-shell auth-page-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`comet comet-${i + 1}`} />
+        ))}
+      </div>
+      <section className="auth-shell">
+        <SignUp />
+      </section>
+    </main>
   );
 }

@@ -1342,11 +1342,12 @@ ul, ol { list-style: none; padding: 0; }
 
 .auth-card {
   width: min(100%, 720px);
-  padding: 2.5rem;
-  border: 1px solid var(--line);
+  padding: 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
-  background: var(--panel);
-  backdrop-filter: blur(18px);
+  background: rgba(10, 15, 30, 0.7);
+  backdrop-filter: blur(40px) saturate(1.5);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .auth-card h1 {
@@ -1394,16 +1395,21 @@ ul, ol { list-style: none; padding: 0; }
 .login-copy h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.6rem, 5.5vw, 4.8rem);
-  font-weight: 800;
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  font-weight: 900;
   line-height: 1;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, #a0c4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(160, 196, 255, 0.3));
 }
 
 .login-copy p {
   max-width: 58ch;
-  margin: 1.25rem 0 0;
-  color: rgba(237, 248, 247, 0.7);
+  margin: 1.5rem 0 0;
+  color: rgba(230, 240, 255, 0.7);
+  font-size: 1.15rem;
   line-height: 1.8;
 }
 
@@ -1415,27 +1421,27 @@ ul, ol { list-style: none; padding: 0; }
 }
 
 .login-proof-list span {
-  padding: 0.55rem 0.8rem;
-  border-radius: 8px;
-  border: 1px solid rgba(2, 156, 193, 0.34);
-  background: rgba(2, 156, 193, 0.08);
-  color: rgba(237, 248, 247, 0.78);
-  font-size: 0.86rem;
-  font-weight: 700;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  background: rgba(0, 240, 255, 0.1);
+  color: #00f0ff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
 }
 
 .login-panel {
   display: grid;
   justify-items: center;
-  gap: 1rem;
-  padding: 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background:
-    linear-gradient(145deg, rgba(2, 156, 193, 0.12), transparent 48%),
-    rgba(8, 16, 24, 0.68);
-  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(18px);
+  gap: 1.5rem;
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  background: rgba(10, 15, 30, 0.7);
+  backdrop-filter: blur(40px) saturate(1.5);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .clerk-login-root {
