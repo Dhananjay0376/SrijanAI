@@ -1820,6 +1820,7 @@ code {
 .landing-proof-strip {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.8rem;
 }
 
