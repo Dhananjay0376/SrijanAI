@@ -133,15 +133,20 @@ ul, ol { list-style: none; padding: 0; }
   z-index: 1;
 }
 
+.site-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
 .snow-overlay-canvas {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   width: 100%;
   height: 100%;
   pointer-events: none;
   display: block;
-  opacity: 0.8;
+  opacity: 0.58;
 }
 
 /* ── Sticky Header ── */
@@ -151,12 +156,15 @@ ul, ol { list-style: none; padding: 0; }
   z-index: 100;
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  background: rgba(5, 13, 26, 0.7);
+  background:
+    linear-gradient(90deg, rgba(2, 156, 193, 0.16) 0%, rgba(61, 102, 99, 0.3) 45%, rgba(9, 51, 48, 0.92) 100%);
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .site-header {
+  position: relative;
   width: 100%;
   margin: 0;
   display: flex;
@@ -164,6 +172,21 @@ ul, ol { list-style: none; padding: 0; }
   justify-content: space-between;
   gap: 1rem;
   padding: 0.9rem 1.25rem;
+}
+
+.site-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 70%),
+    radial-gradient(circle at 14% 50%, rgba(2, 156, 193, 0.16), transparent 30%);
+  pointer-events: none;
 }
 
 .brand-mark {
@@ -1470,59 +1493,17 @@ code {
   z-index: 1;
 }
 
-.landing-snow-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.landing-snowflake {
-  position: absolute;
-  top: -8%;
-  border-radius: 999px;
-  opacity: 0;
-  color: rgba(223, 245, 255, 0.9);
-  background: currentColor;
-  filter: drop-shadow(0 0 8px rgba(122, 196, 214, 0.65));
-  animation-name: landing-snowfall, landing-snow-sway, landing-snow-twinkle;
-  animation-timing-function: linear, ease-in-out, ease-in-out;
-  animation-iteration-count: infinite, infinite, infinite;
-  animation-duration: var(--landing-snow-duration, 18s), 6.5s, 3.1s;
-  animation-delay: var(--landing-snow-delay, 0s), var(--landing-snow-delay, 0s), 0s;
-}
-
-.landing-snowflake-xs {
-  width: 8px;
-  height: 8px;
-}
-
-.landing-snowflake-sm {
-  width: 11px;
-  height: 11px;
-}
-
-.landing-snowflake-md {
-  width: 14px;
-  height: 14px;
-}
-
-.landing-snowflake-lg {
-  width: 18px;
-  height: 18px;
-}
-
 .landing-shell::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 18% 25%, rgba(214, 176, 107, 0.2), transparent 45%),
-    radial-gradient(circle at 82% 30%, rgba(120, 90, 40, 0.24), transparent 50%),
-    radial-gradient(circle at 55% 80%, rgba(46, 55, 82, 0.32), transparent 65%),
-    #07080c;
+    radial-gradient(circle at 14% 18%, rgba(2, 156, 193, 0.08), transparent 30%),
+    radial-gradient(circle at 84% 22%, rgba(61, 102, 99, 0.12), transparent 28%),
+    radial-gradient(circle at 76% 72%, rgba(2, 156, 193, 0.05), transparent 24%),
+    radial-gradient(circle at 44% 84%, rgba(61, 102, 99, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(9, 51, 48, 0.9), rgba(3, 14, 14, 0.92));
   pointer-events: none;
 }
 
@@ -1531,11 +1512,13 @@ code {
   position: fixed;
   inset: 0;
   z-index: -1;
-  opacity: 0.2;
+  opacity: 0.18;
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.24) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
-  background-size: 120px 120px, 200px 200px;
+    radial-gradient(circle, rgba(236, 249, 255, 0.8) 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(142, 221, 236, 0.55) 1px, transparent 2px),
+    radial-gradient(circle, rgba(194, 218, 216, 0.35) 0.8px, transparent 1.8px);
+  background-size: 120px 120px, 200px 200px, 280px 280px;
+  background-position: 0 0, 60px 90px, 24px 40px;
   mask-image: linear-gradient(to bottom, black, transparent 78%);
   pointer-events: none;
 }
@@ -2107,30 +2090,6 @@ code {
   border-radius: 999px;
   font-size: 0.94rem;
   box-shadow: 0 18px 42px rgba(2, 156, 193, 0.22);
-}
-
-@keyframes landing-snowfall {
-  0% {
-    transform: translate3d(0, -8vh, 0) rotate(0deg);
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.85;
-  }
-  100% {
-    transform: translate3d(0, 112vh, 0) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes landing-snow-sway {
-  0%, 100% { margin-left: -10px; }
-  50% { margin-left: 18px; }
-}
-
-@keyframes landing-snow-twinkle {
-  0%, 100% { opacity: 0.25; scale: 0.88; }
-  50% { opacity: 0.95; scale: 1.1; }
 }
 
 @keyframes landing-rise {

@@ -1,39 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { LandingSnowOverlay } from "./landing-snow-overlay";
 import { NeonButton } from "../ui/NeonButton";
 
 export default function LandingPage() {
-  const ctaRef = useRef<HTMLElement | null>(null);
-  const [ctaVisible, setCtaVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ctaRef.current;
-    if (!node) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setCtaVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <main className="landing-shell">
-      <LandingSnowOverlay />
-
       <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-hero-copy">
           <p className="landing-kicker">AI × CONTENT × INDIA</p>
@@ -66,8 +38,7 @@ export default function LandingPage() {
 
       <section
         aria-labelledby="landing-bottom-cta-title"
-        className={`landing-bottom-cta ${ctaVisible ? "is-visible" : ""}`}
-        ref={ctaRef}
+        className="landing-bottom-cta is-visible"
       >
         <div className="landing-bottom-cta-inner">
           <h2 id="landing-bottom-cta-title">

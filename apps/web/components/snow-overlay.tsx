@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-type Particle = {
+type Star = {
   alpha: number;
   alphaDirection: 1 | -1;
   radius: number;
@@ -13,24 +13,24 @@ type Particle = {
   y: number;
 };
 
-const PARTICLE_DENSITY = 0.000085;
-const MIN_PARTICLES = 36;
-const MAX_PARTICLES = 120;
+const STAR_DENSITY = 0.00016;
+const MIN_STARS = 80;
+const MAX_STARS = 220;
 
 function randomBetween(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-function createParticle(width: number, height: number): Particle {
+function createStar(width: number, height: number): Star {
   return {
     x: Math.random() * width,
     y: Math.random() * height,
-    radius: randomBetween(1, 4),
-    speedX: randomBetween(-0.18, 0.18),
-    speedY: randomBetween(-0.42, -0.08),
-    alpha: randomBetween(0.15, 0.9),
+    radius: randomBetween(0.8, 2.8),
+    speedX: randomBetween(-0.08, 0.08),
+    speedY: randomBetween(-0.12, 0.12),
+    alpha: randomBetween(0.2, 0.95),
     alphaDirection: Math.random() > 0.5 ? 1 : -1,
-    twinkleSpeed: randomBetween(0.004, 0.012),
+    twinkleSpeed: randomBetween(0.0025, 0.009),
   };
 }
 
@@ -48,15 +48,18 @@ export function SnowOverlay() {
       return;
     }
 
+    const canvasEl: HTMLCanvasElement = canvas;
+    const ctx: CanvasRenderingContext2D = context;
+
     let animationFrame = 0;
-    let particles: Particle[] = [];
+    let stars: Star[] = [];
     let width = 0;
     let height = 0;
     let dpr = 1;
 
-    function getParticleCount() {
-      const count = Math.floor(width * height * PARTICLE_DENSITY);
-      return Math.min(MAX_PARTICLES, Math.max(MIN_PARTICLES, count));
+    function getStarCount() {
+      const count = Math.floor(width * height * STAR_DENSITY);
+      return Math.min(MAX_STARS, Math.max(MIN_STARS, count));
     }
 
     function resizeCanvas() {
@@ -64,72 +67,118 @@ export function SnowOverlay() {
       height = window.innerHeight;
       dpr = window.devicePixelRatio || 1;
 
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      canvasEl.width = Math.floor(width * dpr);
+      canvasEl.height = Math.floor(height * dpr);
+      canvasEl.style.width = `${width}px`;
+      canvasEl.style.height = `${height}px`;
 
-      context.setTransform(1, 0, 0, 1, 0, 0);
-      context.scale(dpr, dpr);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
 
-      particles = Array.from({ length: getParticleCount() }, () =>
-        createParticle(width, height),
+      stars = Array.from({ length: getStarCount() }, () => createStar(width, height));
+    }
+
+    function recycleStar(star: Star) {
+      star.x = Math.random() * width;
+      star.y = Math.random() * height;
+      star.radius = randomBetween(0.8, 2.8);
+      star.speedX = randomBetween(-0.08, 0.08);
+      star.speedY = randomBetween(-0.12, 0.12);
+      star.alpha = randomBetween(0.2, 0.95);
+      star.alphaDirection = Math.random() > 0.5 ? 1 : -1;
+      star.twinkleSpeed = randomBetween(0.0025, 0.009);
+    }
+
+    function drawBackground() {
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, "#041817");
+      gradient.addColorStop(0.42, "#093330");
+      gradient.addColorStop(1, "#020b0b");
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      const nebulaLeft = ctx.createRadialGradient(
+        width * 0.18,
+        height * 0.22,
+        0,
+        width * 0.18,
+        height * 0.22,
+        width * 0.28,
       );
+      nebulaLeft.addColorStop(0, "rgba(2, 156, 193, 0.14)");
+      nebulaLeft.addColorStop(1, "rgba(2, 156, 193, 0)");
+      ctx.fillStyle = nebulaLeft;
+      ctx.fillRect(0, 0, width, height);
+
+      const nebulaRight = ctx.createRadialGradient(
+        width * 0.82,
+        height * 0.28,
+        0,
+        width * 0.82,
+        height * 0.28,
+        width * 0.24,
+      );
+      nebulaRight.addColorStop(0, "rgba(61, 102, 99, 0.22)");
+      nebulaRight.addColorStop(1, "rgba(61, 102, 99, 0)");
+      ctx.fillStyle = nebulaRight;
+      ctx.fillRect(0, 0, width, height);
+
+      const nebulaBottom = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.86,
+        0,
+        width * 0.5,
+        height * 0.86,
+        width * 0.32,
+      );
+      nebulaBottom.addColorStop(0, "rgba(2, 156, 193, 0.1)");
+      nebulaBottom.addColorStop(1, "rgba(2, 156, 193, 0)");
+      ctx.fillStyle = nebulaBottom;
+      ctx.fillRect(0, 0, width, height);
     }
 
-    function recycleParticle(particle: Particle) {
-      particle.x = Math.random() * width;
-      particle.y = height + randomBetween(8, 48);
-      particle.radius = randomBetween(1, 4);
-      particle.speedX = randomBetween(-0.18, 0.18);
-      particle.speedY = randomBetween(-0.42, -0.08);
-      particle.alpha = randomBetween(0.15, 0.9);
-      particle.alphaDirection = Math.random() > 0.5 ? 1 : -1;
-      particle.twinkleSpeed = randomBetween(0.004, 0.012);
-    }
+    function drawStar(star: Star) {
+      star.x += star.speedX;
+      star.y += star.speedY;
+      star.alpha += star.twinkleSpeed * star.alphaDirection;
 
-    function drawParticle(particle: Particle) {
-      particle.x += particle.speedX;
-      particle.y += particle.speedY;
-      particle.alpha += particle.twinkleSpeed * particle.alphaDirection;
-
-      if (particle.alpha >= 0.95) {
-        particle.alpha = 0.95;
-        particle.alphaDirection = -1;
-      } else if (particle.alpha <= 0.08) {
-        particle.alpha = 0.08;
-        particle.alphaDirection = 1;
+      if (star.alpha >= 1) {
+        star.alpha = 1;
+        star.alphaDirection = -1;
+      } else if (star.alpha <= 0.14) {
+        star.alpha = 0.14;
+        star.alphaDirection = 1;
       }
 
-      if (
-        particle.y + particle.radius < -12 ||
-        particle.x + particle.radius < -12 ||
-        particle.x - particle.radius > width + 12
-      ) {
-        recycleParticle(particle);
+      if (star.x < -8 || star.x > width + 8 || star.y < -8 || star.y > height + 8) {
+        recycleStar(star);
       }
 
-      context.beginPath();
-      context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-      context.fillStyle = `rgba(215, 245, 255, ${particle.alpha})`;
-      context.shadowBlur = particle.radius * 6;
-      context.shadowColor = "rgba(125, 205, 255, 0.9)";
-      context.fill();
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(230, 247, 255, ${star.alpha})`;
+      ctx.shadowBlur = star.radius * 7;
+      ctx.shadowColor = "rgba(124, 213, 238, 0.88)";
+      ctx.fill();
+
+      if (star.radius > 1.8) {
+        ctx.beginPath();
+        ctx.moveTo(star.x - star.radius * 2.2, star.y);
+        ctx.lineTo(star.x + star.radius * 2.2, star.y);
+        ctx.moveTo(star.x, star.y - star.radius * 2.2);
+        ctx.lineTo(star.x, star.y + star.radius * 2.2);
+        ctx.strokeStyle = `rgba(228, 246, 255, ${star.alpha * 0.35})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
     }
 
     function render() {
-      const gradient = context.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, "#03192f");
-      gradient.addColorStop(0.55, "#08294a");
-      gradient.addColorStop(1, "#04111f");
-
-      context.clearRect(0, 0, width, height);
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, width, height);
-
-      particles.forEach(drawParticle);
-      context.shadowBlur = 0;
-
+      drawBackground();
+      stars.forEach(drawStar);
+      ctx.shadowBlur = 0;
       animationFrame = window.requestAnimationFrame(render);
     }
 
