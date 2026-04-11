@@ -10,11 +10,13 @@ const {
   getCalendar,
   listCalendarsByUser,
 } = require("./modules/calendar");
+const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
 const { parseJsonBody, sendError, sendJson } = require("./lib/http");
 const {
   validateCreatorProfile,
   validateCalendar,
+  validatePost,
 } = require("./lib/validation");
 
 const server = http.createServer((req, res) => {
@@ -101,6 +103,47 @@ const server = http.createServer((req, res) => {
     }
 
     sendError(res, 400, "Provide id or userId to fetch calendars");
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/posts") {
+    parseJsonBody(req)
+      .then((input) => {
+        const errors = validatePost(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid post input", errors);
+          return;
+        }
+        const post = createPost(input);
+        sendJson(res, 201, post);
+      })
+      .catch(() => {
+        sendError(res, 400, "Invalid JSON body");
+      });
+    return;
+  }
+
+  if (req.method === "GET" && req.url.startsWith("/posts")) {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const postId = url.searchParams.get("id");
+    const calendarId = url.searchParams.get("calendarId");
+
+    if (postId) {
+      const post = getPost(postId);
+      if (!post) {
+        sendError(res, 404, "Post not found");
+        return;
+      }
+      sendJson(res, 200, post);
+      return;
+    }
+
+    if (calendarId) {
+      sendJson(res, 200, listPostsByCalendar(calendarId));
+      return;
+    }
+
+    sendError(res, 400, "Provide id or calendarId to fetch posts");
     return;
   }
 
