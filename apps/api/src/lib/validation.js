@@ -69,4 +69,48 @@ function validatePost(input) {
   return errors;
 }
 
-module.exports = { validateCreatorProfile, validateCalendar, validatePost };
+function validateMonthlyGeneration(input) {
+  const errors = [];
+
+  if (!isNonEmptyString(input.profileId)) {
+    errors.push("profileId is required");
+  }
+  if (!isNonEmptyString(input.month)) {
+    errors.push("month is required");
+  }
+  if (!isPositiveInteger(input.year)) {
+    errors.push("year must be a positive integer");
+  }
+  if (!Array.isArray(input.selectedDays) || input.selectedDays.length === 0) {
+    errors.push("selectedDays must be a non-empty array");
+  }
+
+  return errors;
+}
+
+function validatePostGeneration(input) {
+  const errors = [];
+
+  if (!isNonEmptyString(input.calendarId)) {
+    errors.push("calendarId is required");
+  }
+  if (!isNonEmptyString(input.day)) {
+    errors.push("day is required");
+  }
+  if (!isNonEmptyString(input.platform)) {
+    errors.push("platform is required");
+  }
+  if (!isNonEmptyString(input.tone)) {
+    errors.push("tone is required");
+  }
+
+  return errors;
+}
+
+module.exports = {
+  validateCreatorProfile,
+  validateCalendar,
+  validatePost,
+  validateMonthlyGeneration,
+  validatePostGeneration,
+};
