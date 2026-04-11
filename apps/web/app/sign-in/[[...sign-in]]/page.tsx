@@ -31,15 +31,24 @@ export default async function SignInPage() {
       <section className="login-shell">
       <div className="login-robot-section">
         <div className="login-robot-container" aria-hidden="true">
-          <div className="login-robot robot-top">
-            <img src="/images/robot_smoke.png" alt="Cosmic Robot Top" />
-          </div>
-          <div className="login-robot robot-mid">
-            <img src="/images/robot_smoke.png" alt="Cosmic Robot Mid" />
-          </div>
-          <div className="login-robot robot-bot">
-            <img src="/images/robot_smoke.png" alt="Cosmic Robot Bot" />
-          </div>
+          {[ 'top', 'mid', 'bot' ].map((pos) => (
+            <div key={pos} className={`robot-3d-model robot-${pos}`}>
+              <div className="robot-cube">
+                <div className="robot-face robot-front">
+                  <div className="robot-screen">
+                    <div className="robot-eye" />
+                    <div className="robot-eye" />
+                  </div>
+                </div>
+                <div className="robot-face robot-back" />
+                <div className="robot-face robot-left" />
+                <div className="robot-face robot-right" />
+                <div className="robot-face robot-top-side" />
+                <div className="robot-face robot-bottom-side" />
+              </div>
+              <div className="robot-smoke-trail" />
+            </div>
+          ))}
         </div>
       </div>
 
