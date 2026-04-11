@@ -3,8 +3,8 @@
 ## Project Status
 - Last updated: 2026-04-11
 - Current phase: Foundation
-- Current focus: Web-first monorepo and landing page scaffold
-- Progress summary: Project documentation, monorepo root, and initial Next.js web scaffold are in place. Production build verification is passing.
+- Current focus: Marketing site structure and authentication foundation
+- Progress summary: The repo now includes a web-first monorepo, a richer marketing site foundation, Clerk-ready sign-in/sign-up routes, a protected dashboard shell, and passing production build verification.
 
 ## Product Vision
 SrijanAI is an AI-powered content planning and generation platform for creators and small brands who lose time every month planning posts, writing captions, adapting content for platforms, and maintaining consistency.
@@ -414,14 +414,18 @@ Before a task is considered complete:
 - 2026-04-11: Scaffolded initial Next.js web app in `apps/web`
 - 2026-04-11: Added first landing page shell for SrijanAI
 - 2026-04-11: Verified production build for the initial web scaffold
+- 2026-04-11: Expanded the marketing site with navigation, feature sections, About page, Guide page, and legal page placeholders
+- 2026-04-11: Added Clerk-ready authentication foundation with sign-in and sign-up routes
+- 2026-04-11: Added a protected dashboard shell for future app flows
+- 2026-04-11: Added environment setup guidance for auth in `apps/web/.env.example`
 
 ### In Progress
-- Prepare landing page refinement and authentication foundation
+- Prepare onboarding flow and dashboard information architecture
 
 ### Next Up
-- Refine homepage sections and navigation
-- Add authentication foundation
-- Add About, Guide, Privacy Policy, and Terms pages
+- Build the creator onboarding flow
+- Design the dashboard shell for calendar generation
+- Start the monthly calendar selection experience
 
 ## Open Decisions
 These should be finalized as we move into implementation:
@@ -445,3 +449,6 @@ This repository will be built incrementally with:
 - The initial web app is built with Next.js App Router and TypeScript.
 - A repo-local `.npmrc` overrides the global npm script shell to use `cmd.exe`, which avoids Windows build issues caused by a Git Bash `script-shell` override.
 - Initial dependency installation was slowed by npm registry connection resets and long package metadata fetch times; the current lockfile and installed dependencies are now in a working state.
+- Clerk is installed as the initial authentication provider for the web app.
+- Auth routes are scaffolded to fail gracefully until `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` are configured.
+- The dashboard route already contains server-side auth gating logic and will become the base app surface for onboarding and content workflows.

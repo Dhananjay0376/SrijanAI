@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { AppProvider } from "@/components/app-provider";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,8 +16,15 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AppProvider>
+          <div className="site-shell">
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+          </div>
+        </AppProvider>
+      </body>
     </html>
   );
 }
-

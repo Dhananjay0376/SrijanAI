@@ -10,6 +10,7 @@
   --accent: #79f0d0;
   --accent-strong: #53d8ff;
   --glow: rgba(83, 216, 255, 0.25);
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
 }
 
 * {
@@ -28,7 +29,7 @@ body {
     radial-gradient(circle at top right, rgba(121, 240, 208, 0.14), transparent 28%),
     linear-gradient(180deg, #07101d 0%, #091626 46%, #06111e 100%);
   color: var(--text);
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-display);
 }
 
 a {
@@ -39,7 +40,70 @@ a {
 .page-shell {
   width: min(1160px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 4rem 0 5rem;
+  padding: 2rem 0 5rem;
+}
+
+.site-shell {
+  min-height: 100vh;
+}
+
+.site-header,
+.site-footer {
+  width: min(1160px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 0 0.6rem;
+}
+
+.brand-mark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.brand-kicker {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.site-nav,
+.site-actions,
+.proof-strip,
+.footer-links,
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.site-nav a,
+.footer-links a,
+.nav-link-button {
+  color: var(--muted);
+}
+
+.nav-primary-button,
+.nav-link-button {
+  border-radius: 999px;
+  padding: 0.8rem 1.1rem;
+  border: 1px solid transparent;
+}
+
+.nav-primary-button {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #04121d;
+  font-weight: 700;
 }
 
 .hero {
@@ -83,6 +147,20 @@ a {
   max-width: 58ch;
   font-size: 1.05rem;
   margin: 1.25rem 0 0;
+}
+
+.proof-strip {
+  flex-wrap: wrap;
+  margin-top: 1.3rem;
+}
+
+.proof-strip span {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .hero-actions {
@@ -205,8 +283,18 @@ a {
   margin-top: 2rem;
 }
 
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
 .content-card,
-.roadmap-section {
+.roadmap-section,
+.story-card,
+.content-page-card,
+.auth-card {
   padding: 2rem;
 }
 
@@ -221,19 +309,121 @@ a {
     radial-gradient(circle at top, rgba(83, 216, 255, 0.14), transparent 50%);
 }
 
+.story-card,
+.content-page-card,
+.auth-card {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+}
+
+.story-index {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.story-card h2,
+.content-page-card h1,
+.auth-card h1 {
+  margin: 0;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.story-card p,
+.content-page-card p,
+.auth-card p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .roadmap-section {
   margin-top: 1.5rem;
 }
 
+.content-page-shell,
+.auth-shell {
+  width: min(960px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 3rem 0 5rem;
+}
+
+.step-list {
+  margin: 1.2rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.auth-shell {
+  display: grid;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(100%, 720px);
+}
+
+.auth-code-block {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-family: "Consolas", monospace;
+}
+
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.2rem 0 2.4rem;
+  border-top: 1px solid var(--line);
+}
+
+.footer-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.footer-copy {
+  margin: 0.4rem 0 0;
+  max-width: 48ch;
+  color: var(--muted);
+}
+
+code {
+  font-family: "Consolas", monospace;
+}
+
 @media (max-width: 920px) {
   .hero,
-  .content-grid {
+  .content-grid,
+  .story-grid,
+  .site-footer {
     grid-template-columns: 1fr;
   }
 
   .hero {
     min-height: auto;
     padding-top: 1rem;
+  }
+
+  .site-header,
+  .site-nav,
+  .site-actions,
+  .site-footer,
+  .footer-links {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .hero h1 {
@@ -249,13 +439,19 @@ a {
 
   .hero-card,
   .content-card,
-  .roadmap-section {
+  .roadmap-section,
+  .story-card,
+  .content-page-card,
+  .auth-card {
     border-radius: 22px;
   }
 
   .content-card,
   .roadmap-section,
-  .calendar-panel {
+  .calendar-panel,
+  .story-card,
+  .content-page-card,
+  .auth-card {
     padding: 1.15rem;
   }
 
