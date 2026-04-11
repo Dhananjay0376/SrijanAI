@@ -13,10 +13,13 @@ const {
 const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
 const { parseJsonBody, sendError, sendJson } = require("./lib/http");
+const { generateMonthlyTitles, generatePost } = require("./lib/ai/router");
 const {
   validateCreatorProfile,
   validateCalendar,
   validatePost,
+  validateMonthlyGeneration,
+  validatePostGeneration,
 } = require("./lib/validation");
 
 const server = http.createServer((req, res) => {
@@ -144,6 +147,40 @@ const server = http.createServer((req, res) => {
     }
 
     sendError(res, 400, "Provide id or calendarId to fetch posts");
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/generate/monthly") {
+    parseJsonBody(req)
+      .then(async (input) => {
+        const errors = validateMonthlyGeneration(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid monthly generation input", errors);
+          return;
+        }
+        const result = await generateMonthlyTitles(input);
+        sendJson(res, 200, result);
+      })
+      .catch(() => {
+        sendError(res, 400, "Invalid JSON body");
+      });
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/generate/post") {
+    parseJsonBody(req)
+      .then(async (input) => {
+        const errors = validatePostGeneration(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid post generation input", errors);
+          return;
+        }
+        const result = await generatePost(input);
+        sendJson(res, 200, result);
+      })
+      .catch(() => {
+        sendError(res, 400, "Invalid JSON body");
+      });
     return;
   }
 
