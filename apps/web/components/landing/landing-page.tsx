@@ -97,13 +97,7 @@ export default function LandingPage() {
             <NeonButton href="/sign-up">
               Start for Free <ArrowRight size={18} />
             </NeonButton>
-            <NeonButton
-              className="landing-demo-button"
-              href="/sign-in"
-              variant="outline"
-            >
-              Demo Login →
-            </NeonButton>
+
           </div>
         </div>
       </section>
