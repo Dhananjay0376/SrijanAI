@@ -60,5 +60,13 @@ Cross-team shared work should mostly happen in:
 - split large changes into multiple pull requests
 - merge frequently to avoid long-lived drift from `main`
 
+## Local Setup Note (Windows)
+If `npm run build` fails locally because npm is configured to use Git Bash as the script shell,
+set a local user-level override instead of committing `.npmrc`:
+
+```
+npm config set script-shell "C:\\Windows\\System32\\cmd.exe"
+```
+
 ## Current Working Rule
 SrijanAI will stay as one monorepo with separated app and package boundaries, not as separate frontend and backend repositories.
