@@ -14,8 +14,8 @@ import {
   Sparkles,
   Video,
 } from "lucide-react";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { NeonButton } from "@/components/ui/NeonButton";
+import { GlassCard } from "../ui/GlassCard";
+import { NeonButton } from "../ui/NeonButton";
 
 const platforms = [
   {

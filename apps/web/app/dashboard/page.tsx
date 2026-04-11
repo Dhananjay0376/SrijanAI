@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { ContentStudio } from "@/components/studio/content-studio";
+import { ContentStudio } from "../../components/studio/content-studio";
 import { hasClerkEnv } from "../../lib/auth";
 
 export const dynamic = "force-dynamic";
