@@ -1324,6 +1324,108 @@ ul, ol { list-style: none; padding: 0; }
   font-size: 0.85rem;
 }
 
+.login-shell {
+  width: min(1120px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 4rem 0 5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+  gap: 2rem;
+  align-items: center;
+}
+
+.login-copy {
+  max-width: 620px;
+}
+
+.login-copy h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.login-copy p {
+  max-width: 58ch;
+  margin: 1.25rem 0 0;
+  color: rgba(237, 248, 247, 0.7);
+  line-height: 1.8;
+}
+
+.login-proof-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.8rem;
+}
+
+.login-proof-list span {
+  padding: 0.55rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(2, 156, 193, 0.34);
+  background: rgba(2, 156, 193, 0.08);
+  color: rgba(237, 248, 247, 0.78);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.login-panel {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(2, 156, 193, 0.12), transparent 48%),
+    rgba(8, 16, 24, 0.68);
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.clerk-login-root {
+  width: 100%;
+}
+
+.clerk-login-card {
+  width: 100%;
+  border-radius: 8px;
+  border: 0;
+  background: rgba(5, 13, 18, 0.76);
+  box-shadow: none;
+}
+
+.clerk-login-title {
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+.clerk-login-subtitle {
+  color: rgba(237, 248, 247, 0.62);
+}
+
+.clerk-login-primary {
+  border-radius: 8px;
+  background: var(--accent);
+  color: #052a2f;
+  font-weight: 800;
+}
+
+.clerk-login-link,
+.login-switch a {
+  color: #8eddec;
+  font-weight: 800;
+}
+
+.login-switch {
+  margin: 0;
+  color: rgba(237, 248, 247, 0.64);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 code {
   font-family: 'Consolas', 'Fira Code', monospace;
 }
@@ -1348,8 +1450,13 @@ code {
 @media (max-width: 920px) {
   .hero,
   .content-grid,
-  .story-grid {
+  .story-grid,
+  .login-shell {
     grid-template-columns: 1fr;
+  }
+
+  .login-shell {
+    padding-top: 2.5rem;
   }
 
   .hero {
@@ -1385,7 +1492,8 @@ code {
 @media (max-width: 640px) {
   .page-shell,
   .content-page-shell,
-  .auth-shell {
+  .auth-shell,
+  .login-shell {
     width: min(100% - 1.2rem, 1200px);
   }
 
@@ -1421,6 +1529,14 @@ code {
 
   .hero h1 {
     font-size: clamp(2.2rem, 12vw, 3.2rem);
+  }
+
+  .login-copy h1 {
+    font-size: clamp(2.25rem, 11vw, 3.25rem);
+  }
+
+  .login-panel {
+    padding: 0.65rem;
   }
 
   .calendar-grid {
