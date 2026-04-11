@@ -1,6 +1,10 @@
 const groq = require("./providers/groq");
 const gemini = require("./providers/gemini");
 const openrouter = require("./providers/openrouter");
+const {
+  validateMonthlyResult,
+  validatePostResult,
+} = require("./guardrails");
 
 const providers = [groq, gemini, openrouter];
 
@@ -10,10 +14,20 @@ async function runWithFallback(taskName, input) {
   for (const provider of providers) {
     try {
       if (taskName === "monthly") {
-        return await provider.generateMonthlyTitles(input);
+        const result = await provider.generateMonthlyTitles(input);
+        const guard = validateMonthlyResult(result, input.selectedDays?.length);
+        if (!guard.ok) {
+          throw new Error(guard.error);
+        }
+        return result;
       }
       if (taskName === "post") {
-        return await provider.generatePost(input);
+        const result = await provider.generatePost(input);
+        const guard = validatePostResult(result);
+        if (!guard.ok) {
+          throw new Error(guard.error);
+        }
+        return result;
       }
     } catch (error) {
       lastError = error;
@@ -33,4 +47,3 @@ async function generatePost(input) {
 }
 
 module.exports = { generateMonthlyTitles, generatePost };
-
