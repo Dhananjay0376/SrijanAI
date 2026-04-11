@@ -5,48 +5,73 @@ import {
   CheckCircle2,
   Copy,
   Hash,
-  BriefcaseBusiness,
-  Camera,
   Loader2,
-  MessageCircle,
   RefreshCcw,
   Send,
   Sparkles,
-  Video,
 } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
 
+const InstagramIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
+
+const YoutubeIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+  </svg>
+);
+
+const TwitterIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+  </svg>
+);
+
+const LinkedinIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+
 const platforms = [
   {
     id: "instagram",
-    icon: <Camera />,
-    label: "Reel",
-    channel: "Instagram",
+    icon: <InstagramIcon />,
+    label: "Instagram",
+    channel: "Instagram Reel",
     format: "45-sec hook-first Reel",
     accent: "orange",
   },
   {
     id: "youtube",
-    icon: <Video />,
-    label: "Short",
-    channel: "YouTube",
+    icon: <YoutubeIcon />,
+    label: "YouTube",
+    channel: "YouTube Short",
     format: "60-sec retention Short",
     accent: "red",
   },
   {
     id: "twitter",
-    icon: <MessageCircle />,
-    label: "Thread",
+    icon: <TwitterIcon />,
+    label: "Twitter",
     channel: "X / Twitter",
     format: "7-part punchy thread",
     accent: "blue",
   },
   {
     id: "linkedin",
-    icon: <BriefcaseBusiness />,
-    label: "Post",
-    channel: "LinkedIn",
+    icon: <LinkedinIcon />,
+    label: "LinkedIn",
+    channel: "LinkedIn Post",
     format: "Authority-building post",
     accent: "violet",
   },
@@ -88,6 +113,11 @@ export function ContentStudio() {
 
   return (
     <main className="studio-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`comet comet-${i + 1}`} />
+        ))}
+      </div>
       <section className="studio-hero">
         <div>
           <p className="studio-kicker">

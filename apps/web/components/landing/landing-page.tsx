@@ -73,6 +73,11 @@ export default function LandingPage() {
 
   return (
     <main className="landing-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`comet comet-${i + 1}`} />
+        ))}
+      </div>
       <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-hero-copy">
           <p className="landing-kicker">AI × CONTENT × INDIA</p>
