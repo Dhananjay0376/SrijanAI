@@ -29,17 +29,17 @@ export default async function SignInPage() {
         ))}
       </div>
       <section className="login-shell">
-      <div className="login-copy">
-        <p className="section-label">Creator workspace</p>
-        <h1>Sign in and pick up the next content sprint.</h1>
-        <p>
-          Keep your calendar, hooks, scripts, and platform ideas in one calm
-          workspace built for consistent publishing.
-        </p>
-        <div className="login-proof-list" aria-label="Workspace highlights">
-          <span>Monthly plans</span>
-          <span>Platform drafts</span>
-          <span>Creator rhythm</span>
+      <div className="login-robot-section">
+        <div className="login-robot-container" aria-hidden="true">
+          <div className="login-robot robot-top">
+            <img src="/images/robot.png" alt="Cosmic Robot" />
+          </div>
+          <div className="login-robot robot-mid">
+            <img src="/images/robot.png" alt="Cosmic Robot" />
+          </div>
+          <div className="login-robot robot-bot">
+            <img src="/images/robot.png" alt="Cosmic Robot" />
+          </div>
         </div>
       </div>
 
