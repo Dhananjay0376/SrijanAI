@@ -39,7 +39,12 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <main className="page-shell">
+    <main className="landing-shell about-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`comet comet-${i + 1}`} />
+        ))}
+      </div>
       {/* ── Hero ── */}
       <section className="about-hero fade-up">
         <p className="section-label">About SrijanAI</p>
