@@ -50,5 +50,23 @@ function validateCalendar(input) {
   return errors;
 }
 
-module.exports = { validateCreatorProfile, validateCalendar };
+function validatePost(input) {
+  const errors = [];
 
+  if (!isNonEmptyString(input.calendarId)) {
+    errors.push("calendarId is required");
+  }
+  if (!isNonEmptyString(input.day)) {
+    errors.push("day is required");
+  }
+  if (!isNonEmptyString(input.platform)) {
+    errors.push("platform is required");
+  }
+  if (!isNonEmptyString(input.tone)) {
+    errors.push("tone is required");
+  }
+
+  return errors;
+}
+
+module.exports = { validateCreatorProfile, validateCalendar, validatePost };
