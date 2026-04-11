@@ -1379,12 +1379,13 @@ ul, ol { list-style: none; padding: 0; }
 }
 
 .login-shell {
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(1200px, calc(100% - 3rem));
   margin: 0 auto;
-  padding: 4rem 0 5rem;
+  min-height: calc(100vh - 80px);
+  padding: 4rem 0 6rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
-  gap: 2rem;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 4rem;
   align-items: center;
 }
 
@@ -1515,15 +1516,19 @@ ul, ol { list-style: none; padding: 0; }
 }
 
 .login-panel {
-  display: grid;
-  justify-items: center;
-  gap: 1.5rem;
-  padding: 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 3rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
-  background: rgba(10, 15, 30, 0.7);
-  backdrop-filter: blur(40px) saturate(1.5);
+  background: rgba(10, 15, 30, 0.75);
+  backdrop-filter: blur(40px) saturate(1.8);
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  position: relative;
+  z-index: 5;
 }
 
 .clerk-login-root {
@@ -1532,9 +1537,9 @@ ul, ol { list-style: none; padding: 0; }
 
 .clerk-login-card {
   width: 100%;
-  border-radius: 8px;
-  border: 0;
-  background: rgba(5, 13, 18, 0.76);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02) !important;
   box-shadow: none;
 }
 
