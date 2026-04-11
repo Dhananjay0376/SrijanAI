@@ -26,5 +26,10 @@ function getProfile(profileId) {
   return profiles.get(profileId) || null;
 }
 
-module.exports = { createProfile, getProfile };
+function listProfilesByUser(userId) {
+  return Array.from(profiles.values()).filter(
+    (profile) => profile.userId === userId,
+  );
+}
 
+module.exports = { createProfile, getProfile, listProfilesByUser };

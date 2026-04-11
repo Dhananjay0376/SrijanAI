@@ -26,5 +26,10 @@ function getCalendar(calendarId) {
   return calendars.get(calendarId) || null;
 }
 
-module.exports = { createCalendar, getCalendar };
+function listCalendarsByUser(userId) {
+  return Array.from(calendars.values()).filter(
+    (calendar) => calendar.userId === userId,
+  );
+}
 
+module.exports = { createCalendar, getCalendar, listCalendarsByUser };
