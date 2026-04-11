@@ -12,7 +12,6 @@ import {
   Zap,
 } from "lucide-react";
 import { Show } from "@clerk/nextjs";
-import { LandingSnowOverlay } from "./landing-snow-overlay";
 import { NeonButton } from "../ui/NeonButton";
 import { hasClerkPublishableKey } from "../../lib/auth";
 
@@ -74,8 +73,6 @@ export default function LandingPage() {
 
   return (
     <main className="landing-shell">
-      <LandingSnowOverlay />
-
       <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-hero-copy">
           <p className="landing-kicker">AI × CONTENT × INDIA</p>
