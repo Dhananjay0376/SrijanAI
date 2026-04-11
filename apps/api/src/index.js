@@ -15,6 +15,10 @@ const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
 const { parseJsonBody, sendError, sendJson } = require("./lib/http");
 const { logEvent } = require("./lib/logger");
+const {
+  validateMonthlyResponse,
+  validatePostResponse,
+} = require("./lib/schema");
 const { generateMonthlyTitles, generatePost } = require("./lib/ai/router");
 const {
   validateCreatorProfile,
@@ -185,7 +189,13 @@ const server = http.createServer((req, res) => {
             attempts: result.meta?.attempts,
             durationMs: result.meta?.durationMs,
           });
-          sendJson(res, 200, { ...result, calendar });
+          const responsePayload = { ...result, calendar };
+          const responseErrors = validateMonthlyResponse(responsePayload);
+          if (responseErrors.length > 0) {
+            sendError(res, 500, "Response schema violation", responseErrors);
+            return;
+          }
+          sendJson(res, 200, responsePayload);
         } catch (error) {
           sendError(res, 502, "Generation failed", error.message);
         }
@@ -223,7 +233,13 @@ const server = http.createServer((req, res) => {
             attempts: result.meta?.attempts,
             durationMs: result.meta?.durationMs,
           });
-          sendJson(res, 200, { post: stored, meta: result.meta });
+          const responsePayload = { post: stored, meta: result.meta };
+          const responseErrors = validatePostResponse(responsePayload);
+          if (responseErrors.length > 0) {
+            sendError(res, 500, "Response schema violation", responseErrors);
+            return;
+          }
+          sendJson(res, 200, responsePayload);
         } catch (error) {
           sendError(res, 502, "Generation failed", error.message);
         }
