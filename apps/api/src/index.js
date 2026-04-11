@@ -187,12 +187,24 @@ const server = http.createServer((req, res) => {
         }
         try {
           const result = await generatePost(input);
+          const stored = createPost({
+            calendarId: input.calendarId,
+            day: input.day,
+            platform: input.platform,
+            tone: input.tone,
+            title: result.title,
+            hook: result.hook,
+            caption: result.caption,
+            hashtags: result.hashtags,
+            cta: result.cta,
+            platformTips: result.platformTips,
+          });
           logEvent("generation.post", {
             provider: result.meta?.provider,
             attempts: result.meta?.attempts,
             durationMs: result.meta?.durationMs,
           });
-          sendJson(res, 200, result);
+          sendJson(res, 200, { post: stored, meta: result.meta });
         } catch (error) {
           sendError(res, 502, "Generation failed", error.message);
         }
