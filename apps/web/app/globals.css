@@ -1245,19 +1245,23 @@ ul, ol { list-style: none; padding: 0; }
 
 .guide-hero h1 {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 1.1;
-  margin: 0.5rem 0 0;
+  margin: 0.8rem 0 0;
+  background: linear-gradient(135deg, #ffffff 0%, #a0c4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(160, 196, 255, 0.3));
 }
 
 .guide-hero p {
-  color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.75;
-  margin: 1rem 0 0;
-  max-width: 55ch;
+  color: rgba(230, 240, 255, 0.7);
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin: 1.5rem 0 0;
+  max-width: 60ch;
 }
 
 .guide-steps {
@@ -1269,50 +1273,52 @@ ul, ol { list-style: none; padding: 0; }
 .guide-step {
   display: grid;
   grid-template-columns: 60px 1fr;
-  gap: 1.2rem;
-  padding: 1.8rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--panel);
-  backdrop-filter: blur(14px);
-  transition: border-color var(--transition-smooth), transform var(--transition-smooth);
+  gap: 1.5rem;
+  padding: 2.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  background: rgba(12, 18, 32, 0.7);
+  backdrop-filter: blur(30px) saturate(1.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   align-items: start;
 }
 
 .guide-step:hover {
-  border-color: var(--line-hover);
-  transform: translateX(4px);
+  transform: translateX(8px) scale(1.01);
+  border-color: rgba(0, 240, 255, 0.5);
+  background: rgba(20, 30, 50, 0.85);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.2);
 }
 
 .guide-step-number {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
   border-radius: 14px;
   display: grid;
   place-items: center;
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 900;
   flex-shrink: 0;
+  background: rgba(0, 240, 255, 0.1) !important;
+  border: 1px solid rgba(0, 240, 255, 0.3) !important;
+  color: #00f0ff !important;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
 }
-
-.guide-step:nth-child(1) .guide-step-number { background: rgba(61, 102, 99, 0.16); border: 1px solid rgba(61, 102, 99, 0.2); color: var(--accent); }
-.guide-step:nth-child(2) .guide-step-number { background: rgba(2, 156, 193, 0.12); border: 1px solid rgba(2, 156, 193, 0.18); color: var(--accent-strong); }
-.guide-step:nth-child(3) .guide-step-number { background: rgba(2, 156, 193, 0.08); border: 1px solid rgba(2, 156, 193, 0.14); color: var(--accent-hot); }
-.guide-step:nth-child(4) .guide-step-number { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.15); color: #fbbf24; }
-.guide-step:nth-child(5) .guide-step-number { background: rgba(244, 114, 182, 0.1); border: 1px solid rgba(244, 114, 182, 0.15); color: #f472b6; }
 
 .guide-step-content h3 {
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 0.4rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 0.6rem;
+  color: #fff;
 }
 
 .guide-step-content p {
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.65;
+  color: rgba(230, 240, 255, 0.6);
+  font-size: 1.05rem;
+  line-height: 1.7;
   margin: 0;
 }
 

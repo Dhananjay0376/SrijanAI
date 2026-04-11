@@ -35,7 +35,12 @@ const guideSteps = [
 
 export default function GuidePage() {
   return (
-    <main className="page-shell">
+    <main className="landing-shell guide-page-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`comet comet-${i + 1}`} />
+        ))}
+      </div>
       {/* ── Hero ── */}
       <section className="guide-hero fade-up">
         <p className="section-label">Guide</p>
