@@ -2225,6 +2225,199 @@ code {
   box-shadow: 0 18px 42px rgba(2, 156, 193, 0.22);
 }
 
+/* ── Deep Dive into Creation (signed-in CTA) ────────────────── */
+.deep-dive-panel {
+  width: min(100%, 960px);
+  padding: 3rem 2rem 2.5rem;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px solid rgba(2, 156, 193, 0.18);
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(2, 156, 193, 0.14), transparent 52%),
+    radial-gradient(ellipse at 75% 100%, rgba(99, 184, 178, 0.10), transparent 48%),
+    linear-gradient(160deg, rgba(12, 18, 28, 0.92), rgba(6, 10, 16, 0.96));
+  box-shadow:
+    0 0 80px rgba(2, 156, 193, 0.08),
+    0 30px 90px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(24px);
+}
+
+.deep-dive-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(2, 156, 193, 0.32);
+  background: rgba(2, 156, 193, 0.10);
+  color: #8eddec;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  animation: deep-dive-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes deep-dive-glow {
+  0%   { box-shadow: 0 0 12px rgba(2, 156, 193, 0.15); }
+  100% { box-shadow: 0 0 28px rgba(2, 156, 193, 0.30); }
+}
+
+.deep-dive-panel h2 {
+  margin: 0;
+  font-family: var(--font-hero);
+  font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.deep-dive-panel h2 span {
+  color: #8eddec;
+  font-style: italic;
+  text-shadow: 0 0 30px rgba(2, 156, 193, 0.22);
+}
+
+.deep-dive-subtitle {
+  max-width: 620px;
+  margin: 1rem auto 2.2rem;
+  color: rgba(237, 248, 247, 0.64);
+  font-size: 0.96rem;
+  line-height: 1.8;
+}
+
+.deep-dive-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 2.4rem;
+}
+
+.deep-dive-card {
+  position: relative;
+  padding: 1.3rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    background 200ms ease,
+    box-shadow 200ms ease;
+  animation: deep-dive-card-rise 600ms ease both;
+}
+
+.deep-dive-card:nth-child(1) { animation-delay: 80ms; }
+.deep-dive-card:nth-child(2) { animation-delay: 160ms; }
+.deep-dive-card:nth-child(3) { animation-delay: 240ms; }
+.deep-dive-card:nth-child(4) { animation-delay: 320ms; }
+
+@keyframes deep-dive-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.deep-dive-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+}
+
+.deep-dive-card-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.85rem;
+}
+
+.deep-dive-card h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f0fffe;
+}
+
+.deep-dive-card p {
+  margin: 0;
+  color: rgba(237, 248, 247, 0.54);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+/* Accent colors per card */
+.deep-dive-accent-emerald .deep-dive-card-icon { color: #63b8b2; }
+.deep-dive-accent-emerald:hover { border-color: rgba(99, 184, 178, 0.45); }
+
+.deep-dive-accent-violet .deep-dive-card-icon { color: #a78bfa; }
+.deep-dive-accent-violet:hover { border-color: rgba(167, 139, 250, 0.42); }
+
+.deep-dive-accent-blue .deep-dive-card-icon { color: #4db3cb; }
+.deep-dive-accent-blue:hover { border-color: rgba(77, 179, 203, 0.42); }
+
+.deep-dive-accent-orange .deep-dive-card-icon { color: var(--accent); }
+.deep-dive-accent-orange:hover { border-color: rgba(2, 156, 193, 0.48); }
+
+.deep-dive-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.deep-dive-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: rgba(237, 248, 247, 0.48);
+  font-size: 0.84rem;
+}
+
+.deep-dive-hint svg {
+  color: #8eddec;
+}
+
+/* ── Deep Dive responsive ── */
+@media (max-width: 900px) {
+  .deep-dive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deep-dive-panel {
+    padding: 2.2rem 1.2rem 2rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .deep-dive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deep-dive-panel {
+    padding: 1.8rem 1rem 1.5rem;
+    border-radius: 10px;
+  }
+
+  .deep-dive-panel h2 {
+    font-size: 2rem;
+  }
+
+  .landing-bottom-cta-button {
+    min-width: min(100%, 320px);
+  }
+}
+
 @keyframes landing-snowfall {
   0% {
     transform: translate3d(0, -8vh, 0) rotate(0deg);
