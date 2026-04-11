@@ -44,6 +44,12 @@ async function generateMonthlyTitles(input) {
   return { provider: "groq", titles: result.titles || [] };
 }
 
+async function generateMonthlyTitlesRetry(input, retryPrompt) {
+  const prompt = `${buildMonthlyPrompt(input)}\n\n${retryPrompt}`;
+  const result = await callGroq([{ role: "user", content: prompt }]);
+  return { provider: "groq", titles: result.titles || [] };
+}
+
 async function generatePost(input) {
   const prompt = buildPostPrompt(input);
   const result = await callGroq([{ role: "user", content: prompt }]);
@@ -58,4 +64,23 @@ async function generatePost(input) {
   };
 }
 
-module.exports = { generateMonthlyTitles, generatePost };
+async function generatePostRetry(input, retryPrompt) {
+  const prompt = `${buildPostPrompt(input)}\n\n${retryPrompt}`;
+  const result = await callGroq([{ role: "user", content: prompt }]);
+  return {
+    provider: "groq",
+    title: result.title || input.title || "Untitled post",
+    hook: result.hook || "",
+    caption: result.caption || "",
+    hashtags: result.hashtags || [],
+    cta: result.cta || "",
+    platformTips: result.platformTips || [],
+  };
+}
+
+module.exports = {
+  generateMonthlyTitles,
+  generateMonthlyTitlesRetry,
+  generatePost,
+  generatePostRetry,
+};

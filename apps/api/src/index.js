@@ -9,10 +9,16 @@ const {
   createCalendar,
   getCalendar,
   listCalendarsByUser,
+  updateCalendarTitles,
 } = require("./modules/calendar");
 const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
 const { parseJsonBody, sendError, sendJson } = require("./lib/http");
+const { logEvent } = require("./lib/logger");
+const {
+  validateMonthlyResponse,
+  validatePostResponse,
+} = require("./lib/schema");
 const { generateMonthlyTitles, generatePost } = require("./lib/ai/router");
 const {
   validateCreatorProfile,
@@ -158,8 +164,41 @@ const server = http.createServer((req, res) => {
           sendError(res, 400, "Invalid monthly generation input", errors);
           return;
         }
-        const result = await generateMonthlyTitles(input);
-        sendJson(res, 200, result);
+        try {
+          const result = await generateMonthlyTitles(input);
+          let calendar = null;
+
+          if (input.calendarId) {
+            calendar = updateCalendarTitles(input.calendarId, result.titles);
+            if (!calendar) {
+              sendError(res, 404, "Calendar not found");
+              return;
+            }
+          } else if (input.userId) {
+            const created = createCalendar({
+              userId: input.userId,
+              month: input.month,
+              year: input.year,
+              selectedDays: input.selectedDays,
+            });
+            calendar = updateCalendarTitles(created.id, result.titles);
+          }
+
+          logEvent("generation.monthly", {
+            provider: result.meta?.provider,
+            attempts: result.meta?.attempts,
+            durationMs: result.meta?.durationMs,
+          });
+          const responsePayload = { ...result, calendar };
+          const responseErrors = validateMonthlyResponse(responsePayload);
+          if (responseErrors.length > 0) {
+            sendError(res, 500, "Response schema violation", responseErrors);
+            return;
+          }
+          sendJson(res, 200, responsePayload);
+        } catch (error) {
+          sendError(res, 502, "Generation failed", error.message);
+        }
       })
       .catch(() => {
         sendError(res, 400, "Invalid JSON body");
@@ -175,8 +214,35 @@ const server = http.createServer((req, res) => {
           sendError(res, 400, "Invalid post generation input", errors);
           return;
         }
-        const result = await generatePost(input);
-        sendJson(res, 200, result);
+        try {
+          const result = await generatePost(input);
+          const stored = createPost({
+            calendarId: input.calendarId,
+            day: input.day,
+            platform: input.platform,
+            tone: input.tone,
+            title: result.title,
+            hook: result.hook,
+            caption: result.caption,
+            hashtags: result.hashtags,
+            cta: result.cta,
+            platformTips: result.platformTips,
+          });
+          logEvent("generation.post", {
+            provider: result.meta?.provider,
+            attempts: result.meta?.attempts,
+            durationMs: result.meta?.durationMs,
+          });
+          const responsePayload = { post: stored, meta: result.meta };
+          const responseErrors = validatePostResponse(responsePayload);
+          if (responseErrors.length > 0) {
+            sendError(res, 500, "Response schema violation", responseErrors);
+            return;
+          }
+          sendJson(res, 200, responsePayload);
+        } catch (error) {
+          sendError(res, 502, "Generation failed", error.message);
+        }
       })
       .catch(() => {
         sendError(res, 400, "Invalid JSON body");

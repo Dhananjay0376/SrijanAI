@@ -46,6 +46,12 @@ async function generateMonthlyTitles(input) {
   return { provider: "openrouter", titles: result.titles || [] };
 }
 
+async function generateMonthlyTitlesRetry(input, retryPrompt) {
+  const prompt = `${buildMonthlyPrompt(input)}\n\n${retryPrompt}`;
+  const result = await callOpenRouter([{ role: "user", content: prompt }]);
+  return { provider: "openrouter", titles: result.titles || [] };
+}
+
 async function generatePost(input) {
   const prompt = buildPostPrompt(input);
   const result = await callOpenRouter([{ role: "user", content: prompt }]);
@@ -60,4 +66,23 @@ async function generatePost(input) {
   };
 }
 
-module.exports = { generateMonthlyTitles, generatePost };
+async function generatePostRetry(input, retryPrompt) {
+  const prompt = `${buildPostPrompt(input)}\n\n${retryPrompt}`;
+  const result = await callOpenRouter([{ role: "user", content: prompt }]);
+  return {
+    provider: "openrouter",
+    title: result.title || input.title || "Untitled post",
+    hook: result.hook || "",
+    caption: result.caption || "",
+    hashtags: result.hashtags || [],
+    cta: result.cta || "",
+    platformTips: result.platformTips || [],
+  };
+}
+
+module.exports = {
+  generateMonthlyTitles,
+  generateMonthlyTitlesRetry,
+  generatePost,
+  generatePostRetry,
+};

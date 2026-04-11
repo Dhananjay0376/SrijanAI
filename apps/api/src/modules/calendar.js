@@ -32,4 +32,31 @@ function listCalendarsByUser(userId) {
   );
 }
 
-module.exports = { createCalendar, getCalendar, listCalendarsByUser };
+function updateCalendarTitles(calendarId, titles) {
+  const calendar = calendars.get(calendarId);
+  if (!calendar) {
+    return null;
+  }
+
+  const updatedDays = calendar.days.map((day, index) => ({
+    ...day,
+    title: titles[index] || day.title,
+    status: titles[index] ? "generated" : day.status,
+  }));
+
+  const updated = {
+    ...calendar,
+    days: updatedDays,
+    updatedAt: new Date().toISOString(),
+  };
+
+  calendars.set(calendarId, updated);
+  return updated;
+}
+
+module.exports = {
+  createCalendar,
+  getCalendar,
+  listCalendarsByUser,
+  updateCalendarTitles,
+};
