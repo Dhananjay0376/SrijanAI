@@ -3,6 +3,11 @@ const { healthHandler } = require("./modules/health");
 const { createProfile } = require("./modules/creator-profile");
 const { createCalendar } = require("./modules/calendar");
 const { notFoundHandler } = require("./modules/not-found");
+const { parseJsonBody, sendError, sendJson } = require("./lib/http");
+const {
+  validateCreatorProfile,
+  validateCalendar,
+} = require("./lib/validation");
 
 const server = http.createServer((req, res) => {
   if (req.url === "/health") {
@@ -10,30 +15,36 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === "POST" && req.url === "/profiles") {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk;
-    });
-    req.on("end", () => {
-      const input = JSON.parse(body || "{}");
-      const profile = createProfile(input);
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(profile));
-    });
+    parseJsonBody(req)
+      .then((input) => {
+        const errors = validateCreatorProfile(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid creator profile input", errors);
+          return;
+        }
+        const profile = createProfile(input);
+        sendJson(res, 201, profile);
+      })
+      .catch(() => {
+        sendError(res, 400, "Invalid JSON body");
+      });
     return;
   }
 
   if (req.method === "POST" && req.url === "/calendars") {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk;
-    });
-    req.on("end", () => {
-      const input = JSON.parse(body || "{}");
-      const calendar = createCalendar(input);
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(calendar));
-    });
+    parseJsonBody(req)
+      .then((input) => {
+        const errors = validateCalendar(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid calendar input", errors);
+          return;
+        }
+        const calendar = createCalendar(input);
+        sendJson(res, 201, calendar);
+      })
+      .catch(() => {
+        sendError(res, 400, "Invalid JSON body");
+      });
     return;
   }
 
