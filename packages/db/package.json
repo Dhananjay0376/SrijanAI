@@ -4,8 +4,9 @@
   "private": true,
   "main": "./src/index.js",
   "scripts": {
-    "db:generate": "drizzle-kit generate --config ./drizzle.config.js",
-    "db:push": "drizzle-kit push --config ./drizzle.config.js"
+    "db:check": "node ./scripts/check.js",
+    "db:generate": "node ../../node_modules/drizzle-kit/bin.cjs generate --config ./drizzle.config.js",
+    "db:push": "node ../../node_modules/drizzle-kit/bin.cjs push --config ./drizzle.config.js"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.4"

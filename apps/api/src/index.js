@@ -1,5 +1,5 @@
 const http = require("node:http");
-const { healthHandler } = require("./modules/health");
+const { dbHealthHandler, healthHandler } = require("./modules/health");
 const {
   createProfile,
   getProfile,
@@ -32,6 +32,10 @@ const server = http.createServer(async (req, res) => {
   try {
   if (req.url === "/health") {
     return healthHandler(req, res);
+  }
+
+  if (req.url === "/health/db") {
+    return dbHealthHandler(req, res);
   }
 
   if (req.method === "POST" && req.url === "/profiles") {

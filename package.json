@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "npm run dev --workspace web",
     "dev:api": "npm run dev --workspace api",
+    "db:check": "npm.cmd run db:check --workspace @srijanai/db",
+    "db:generate": "npm.cmd run db:generate --workspace @srijanai/db",
+    "db:push": "npm.cmd run db:push --workspace @srijanai/db",
     "build": "npm run build --workspace web",
     "build:api": "npm run build --workspace api",
     "lint": "npm run lint --workspace web",

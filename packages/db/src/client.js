@@ -16,4 +16,11 @@ const pool = new Pool({
 
 const db = drizzle(pool, { schema });
 
-module.exports = { db, pool, schema };
+async function pingDatabase() {
+  const result = await pool.query(
+    "select current_database() as db, current_user as usr, now() as now",
+  );
+  return result.rows[0];
+}
+
+module.exports = { db, pingDatabase, pool, schema };
