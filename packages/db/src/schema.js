@@ -44,6 +44,8 @@ const posts = pgTable("posts", {
   id: text("id").primaryKey(),
   calendarId: text("calendar_id").notNull(),
   day: varchar("day", { length: 20 }).notNull(),
+  platform: varchar("platform", { length: 40 }).notNull(),
+  tone: varchar("tone", { length: 40 }).notNull(),
   title: text("title").notNull(),
   hook: text("hook").notNull(),
   caption: text("caption").notNull(),
@@ -61,4 +63,3 @@ module.exports = {
   calendarDays,
   posts,
 };
-

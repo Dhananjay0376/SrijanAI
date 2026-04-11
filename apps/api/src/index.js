@@ -28,24 +28,29 @@ const {
   validatePostGeneration,
 } = require("./lib/validation");
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  try {
   if (req.url === "/health") {
     return healthHandler(req, res);
   }
 
   if (req.method === "POST" && req.url === "/profiles") {
     parseJsonBody(req)
-      .then((input) => {
+      .then(async (input) => {
         const errors = validateCreatorProfile(input);
         if (errors.length > 0) {
           sendError(res, 400, "Invalid creator profile input", errors);
           return;
         }
-        const profile = createProfile(input);
+        const profile = await createProfile(input);
         sendJson(res, 201, profile);
       })
-      .catch(() => {
-        sendError(res, 400, "Invalid JSON body");
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
+          sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to create profile", error.message);
       });
     return;
   }
@@ -56,7 +61,7 @@ const server = http.createServer((req, res) => {
     const userId = url.searchParams.get("userId");
 
     if (profileId) {
-      const profile = getProfile(profileId);
+      const profile = await getProfile(profileId);
       if (!profile) {
         sendError(res, 404, "Profile not found");
         return;
@@ -66,7 +71,7 @@ const server = http.createServer((req, res) => {
     }
 
     if (userId) {
-      sendJson(res, 200, listProfilesByUser(userId));
+      sendJson(res, 200, await listProfilesByUser(userId));
       return;
     }
 
@@ -76,17 +81,21 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "POST" && req.url === "/calendars") {
     parseJsonBody(req)
-      .then((input) => {
+      .then(async (input) => {
         const errors = validateCalendar(input);
         if (errors.length > 0) {
           sendError(res, 400, "Invalid calendar input", errors);
           return;
         }
-        const calendar = createCalendar(input);
+        const calendar = await createCalendar(input);
         sendJson(res, 201, calendar);
       })
-      .catch(() => {
-        sendError(res, 400, "Invalid JSON body");
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
+          sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to create calendar", error.message);
       });
     return;
   }
@@ -97,7 +106,7 @@ const server = http.createServer((req, res) => {
     const userId = url.searchParams.get("userId");
 
     if (calendarId) {
-      const calendar = getCalendar(calendarId);
+      const calendar = await getCalendar(calendarId);
       if (!calendar) {
         sendError(res, 404, "Calendar not found");
         return;
@@ -107,7 +116,7 @@ const server = http.createServer((req, res) => {
     }
 
     if (userId) {
-      sendJson(res, 200, listCalendarsByUser(userId));
+      sendJson(res, 200, await listCalendarsByUser(userId));
       return;
     }
 
@@ -117,17 +126,21 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "POST" && req.url === "/posts") {
     parseJsonBody(req)
-      .then((input) => {
+      .then(async (input) => {
         const errors = validatePost(input);
         if (errors.length > 0) {
           sendError(res, 400, "Invalid post input", errors);
           return;
         }
-        const post = createPost(input);
+        const post = await createPost(input);
         sendJson(res, 201, post);
       })
-      .catch(() => {
-        sendError(res, 400, "Invalid JSON body");
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
+          sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to create post", error.message);
       });
     return;
   }
@@ -138,7 +151,7 @@ const server = http.createServer((req, res) => {
     const calendarId = url.searchParams.get("calendarId");
 
     if (postId) {
-      const post = getPost(postId);
+      const post = await getPost(postId);
       if (!post) {
         sendError(res, 404, "Post not found");
         return;
@@ -148,7 +161,7 @@ const server = http.createServer((req, res) => {
     }
 
     if (calendarId) {
-      sendJson(res, 200, listPostsByCalendar(calendarId));
+      sendJson(res, 200, await listPostsByCalendar(calendarId));
       return;
     }
 
@@ -169,19 +182,19 @@ const server = http.createServer((req, res) => {
           let calendar = null;
 
           if (input.calendarId) {
-            calendar = updateCalendarTitles(input.calendarId, result.titles);
+            calendar = await updateCalendarTitles(input.calendarId, result.titles);
             if (!calendar) {
               sendError(res, 404, "Calendar not found");
               return;
             }
           } else if (input.userId) {
-            const created = createCalendar({
+            const created = await createCalendar({
               userId: input.userId,
               month: input.month,
               year: input.year,
               selectedDays: input.selectedDays,
             });
-            calendar = updateCalendarTitles(created.id, result.titles);
+            calendar = await updateCalendarTitles(created.id, result.titles);
           }
 
           logEvent("generation.monthly", {
@@ -200,8 +213,12 @@ const server = http.createServer((req, res) => {
           sendError(res, 502, "Generation failed", error.message);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
         sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to generate monthly plan", error.message);
       });
     return;
   }
@@ -216,7 +233,7 @@ const server = http.createServer((req, res) => {
         }
         try {
           const result = await generatePost(input);
-          const stored = createPost({
+          const stored = await createPost({
             calendarId: input.calendarId,
             day: input.day,
             platform: input.platform,
@@ -244,13 +261,20 @@ const server = http.createServer((req, res) => {
           sendError(res, 502, "Generation failed", error.message);
         }
       })
-      .catch(() => {
-        sendError(res, 400, "Invalid JSON body");
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
+          sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to generate post", error.message);
       });
     return;
   }
 
   return notFoundHandler(req, res);
+  } catch (error) {
+    sendError(res, 500, "Internal server error", error.message);
+  }
 });
 
 const port = process.env.PORT || 4000;
