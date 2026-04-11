@@ -158,8 +158,12 @@ const server = http.createServer((req, res) => {
           sendError(res, 400, "Invalid monthly generation input", errors);
           return;
         }
-        const result = await generateMonthlyTitles(input);
-        sendJson(res, 200, result);
+        try {
+          const result = await generateMonthlyTitles(input);
+          sendJson(res, 200, result);
+        } catch (error) {
+          sendError(res, 502, "Generation failed", error.message);
+        }
       })
       .catch(() => {
         sendError(res, 400, "Invalid JSON body");
@@ -175,8 +179,12 @@ const server = http.createServer((req, res) => {
           sendError(res, 400, "Invalid post generation input", errors);
           return;
         }
-        const result = await generatePost(input);
-        sendJson(res, 200, result);
+        try {
+          const result = await generatePost(input);
+          sendJson(res, 200, result);
+        } catch (error) {
+          sendError(res, 502, "Generation failed", error.message);
+        }
       })
       .catch(() => {
         sendError(res, 400, "Invalid JSON body");
