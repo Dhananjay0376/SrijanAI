@@ -9,6 +9,7 @@ const {
   createCalendar,
   getCalendar,
   listCalendarsByUser,
+  updateCalendarTitles,
 } = require("./modules/calendar");
 const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
@@ -161,12 +162,30 @@ const server = http.createServer((req, res) => {
         }
         try {
           const result = await generateMonthlyTitles(input);
+          let calendar = null;
+
+          if (input.calendarId) {
+            calendar = updateCalendarTitles(input.calendarId, result.titles);
+            if (!calendar) {
+              sendError(res, 404, "Calendar not found");
+              return;
+            }
+          } else if (input.userId) {
+            const created = createCalendar({
+              userId: input.userId,
+              month: input.month,
+              year: input.year,
+              selectedDays: input.selectedDays,
+            });
+            calendar = updateCalendarTitles(created.id, result.titles);
+          }
+
           logEvent("generation.monthly", {
             provider: result.meta?.provider,
             attempts: result.meta?.attempts,
             durationMs: result.meta?.durationMs,
           });
-          sendJson(res, 200, result);
+          sendJson(res, 200, { ...result, calendar });
         } catch (error) {
           sendError(res, 502, "Generation failed", error.message);
         }
