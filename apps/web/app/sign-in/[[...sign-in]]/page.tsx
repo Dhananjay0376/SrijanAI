@@ -32,13 +32,13 @@ export default async function SignInPage() {
       <div className="login-robot-section">
         <div className="login-robot-container" aria-hidden="true">
           <div className="login-robot robot-top">
-            <img src="/images/robot.png" alt="Cosmic Robot" />
+            <img src="/images/robot_smoke.png" alt="Cosmic Robot Top" />
           </div>
           <div className="login-robot robot-mid">
-            <img src="/images/robot.png" alt="Cosmic Robot" />
+            <img src="/images/robot_smoke.png" alt="Cosmic Robot Mid" />
           </div>
           <div className="login-robot robot-bot">
-            <img src="/images/robot.png" alt="Cosmic Robot" />
+            <img src="/images/robot_smoke.png" alt="Cosmic Robot Bot" />
           </div>
         </div>
       </div>

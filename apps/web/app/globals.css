@@ -1393,59 +1393,82 @@ ul, ol { list-style: none; padding: 0; }
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
-  perspective: 1000px;
+  min-height: 500px;
+  perspective: 1500px;
+  position: relative;
 }
 
 .login-robot-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
+  align-items: center;
 }
 
 .login-robot {
-  width: 154px;
-  height: 154px;
-  margin: 0 auto;
-  filter: drop-shadow(0 0 20px rgba(181, 130, 255, 0.4));
-  animation: robot-float 6s ease-in-out infinite alternate;
+  width: 220px;
+  height: 220px;
+  position: relative;
+  filter: drop-shadow(0 0 30px rgba(181, 130, 255, 0.3));
+  transition: transform 0.3s ease;
 }
 
 .login-robot img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  position: relative;
+  z-index: 2;
+}
+
+.login-robot::before {
+  content: "";
+  position: absolute;
+  top: 10%; bottom: 10%; left: 10%; right: 10%;
+  background: radial-gradient(circle, rgba(181, 130, 255, 0.4), transparent 70%);
+  filter: blur(20px);
+  opacity: 0.6;
+  animation: robot-energy-pulse 3s infinite alternate;
+  z-index: 1;
 }
 
 .robot-top {
-  animation: robot-move-lr 8s linear infinite, robot-float 5s ease-in-out infinite alternate;
+  animation: robot-move-lr 10s ease-in-out infinite, robot-float 6s ease-in-out infinite alternate;
 }
 
 .robot-mid {
-  animation: robot-move-rl 8s linear infinite, robot-float 6s ease-in-out infinite alternate-reverse;
+  z-index: 3;
+  margin-top: -2rem;
+  margin-bottom: -2rem;
+  animation: robot-move-rl 10s ease-in-out infinite, robot-float 7s ease-in-out infinite alternate-reverse;
 }
 
 .robot-bot {
-  animation: robot-move-lr 8s linear infinite, robot-float 7s ease-in-out infinite alternate;
+  animation: robot-move-lr 10s ease-in-out infinite, robot-float 8s ease-in-out infinite alternate;
 }
 
 @keyframes robot-move-lr {
-  0% { transform: translateX(-150px) rotate(-10deg); }
-  50% { transform: translateX(150px) rotate(10deg); }
-  100% { transform: translateX(-150px) rotate(-10deg); }
+  0% { transform: translateX(-180px) rotateY(-15deg) rotateX(5deg); }
+  50% { transform: translateX(180px) rotateY(15deg) rotateX(-5deg); }
+  100% { transform: translateX(-180px) rotateY(-15deg) rotateX(5deg); }
 }
 
 @keyframes robot-move-rl {
-  0% { transform: translateX(150px) rotate(10deg); }
-  50% { transform: translateX(-150px) rotate(-10deg); }
-  100% { transform: translateX(150px) rotate(10deg); }
+  0% { transform: translateX(180px) rotateY(15deg) rotateX(-5deg); }
+  50% { transform: translateX(-180px) rotateY(-15deg) rotateX(5deg); }
+  100% { transform: translateX(180px) rotateY(15deg) rotateX(-5deg); }
 }
 
 @keyframes robot-float {
   from { transform: translateY(0); }
-  to { transform: translateY(-20px); }
+  to { transform: translateY(-30px); }
+}
+
+@keyframes robot-energy-pulse {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to { opacity: 0.8; transform: scale(1.1); }
 }
 
 .login-panel {
