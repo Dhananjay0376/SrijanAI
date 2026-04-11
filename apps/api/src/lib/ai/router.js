@@ -8,22 +8,49 @@ const {
 
 const providers = [groq, gemini, openrouter];
 
+function buildRetryPrompt(taskName, input) {
+  if (taskName === "monthly") {
+    return (
+      "Return ONLY valid JSON with this shape:\n" +
+      '{ "titles": ["title1", "title2"] }'
+    );
+  }
+  return (
+    "Return ONLY valid JSON with this shape:\n" +
+    '{ "title": "...", "hook": "...", "caption": "...", "hashtags": ["#"], "cta": "...", "platformTips": ["..."] }'
+  );
+}
+
 async function runWithFallback(taskName, input) {
   let lastError = null;
 
   for (const provider of providers) {
     try {
       if (taskName === "monthly") {
-        const result = await provider.generateMonthlyTitles(input);
-        const guard = validateMonthlyResult(result, input.selectedDays?.length);
+        let result = await provider.generateMonthlyTitles(input);
+        let guard = validateMonthlyResult(result, input.selectedDays?.length);
+        if (!guard.ok && provider.generateMonthlyTitlesRetry) {
+          result = await provider.generateMonthlyTitlesRetry(
+            input,
+            buildRetryPrompt(taskName, input),
+          );
+          guard = validateMonthlyResult(result, input.selectedDays?.length);
+        }
         if (!guard.ok) {
           throw new Error(guard.error);
         }
         return result;
       }
       if (taskName === "post") {
-        const result = await provider.generatePost(input);
-        const guard = validatePostResult(result);
+        let result = await provider.generatePost(input);
+        let guard = validatePostResult(result);
+        if (!guard.ok && provider.generatePostRetry) {
+          result = await provider.generatePostRetry(
+            input,
+            buildRetryPrompt(taskName, input),
+          );
+          guard = validatePostResult(result);
+        }
         if (!guard.ok) {
           throw new Error(guard.error);
         }
