@@ -28,10 +28,17 @@ function withSslMode(url) {
     return url;
   }
 
+  const sslEnabled = process.env.DATABASE_SSL === "true";
+  const sslMode = process.env.DATABASE_SSL_MODE || (sslEnabled ? "no-verify" : null);
+
+  if (!sslMode) {
+    return url;
+  }
+
   try {
     const parsed = new URL(url);
     if (!parsed.searchParams.has("sslmode")) {
-      parsed.searchParams.set("sslmode", "require");
+      parsed.searchParams.set("sslmode", sslMode);
     }
     return parsed.toString();
   } catch {
@@ -39,7 +46,7 @@ function withSslMode(url) {
       return url;
     }
     const joiner = url.includes("?") ? "&" : "?";
-    return `${url}${joiner}sslmode=require`;
+    return `${url}${joiner}sslmode=${sslMode}`;
   }
 }
 
@@ -62,8 +69,24 @@ function getDatabaseUrl() {
   return withHostOverride(withSslMode(process.env.DATABASE_URL));
 }
 
+function getPgSslConfig() {
+  loadEnvFromFile();
+
+  if (process.env.DATABASE_SSL !== "true") {
+    return undefined;
+  }
+
+  const sslMode = process.env.DATABASE_SSL_MODE || "no-verify";
+  if (sslMode === "no-verify") {
+    return { rejectUnauthorized: false };
+  }
+
+  return {};
+}
+
 module.exports = {
   getDatabaseUrl,
+  getPgSslConfig,
   loadEnvFromFile,
   withHostOverride,
   withSslMode,
