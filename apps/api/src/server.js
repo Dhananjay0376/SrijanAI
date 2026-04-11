@@ -1,1 +1,1 @@
-console.log("SrijanAI API workspace is scaffolded. Backend implementation starts here.");
+console.log("Deprecated entrypoint. Use src/index.js instead.");
