@@ -3177,6 +3177,53 @@ code {
     grid-template-columns: 1fr;
   }
 
+  /* ── Login Responsive Fix ── */
+  .login-shell {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 3rem;
+    padding: 3rem 0;
+  }
+
+  .login-robot-section {
+    min-height: auto;
+  }
+
+  .robot-3d-model {
+    width: 140px;
+    height: 140px;
+  }
+
+  .robot-face {
+    width: 140px;
+    height: 140px;
+  }
+
+  .robot-front  { transform: translateZ(70px); }
+  .robot-back   { transform: rotateY(180deg) translateZ(70px); }
+  .robot-left   { transform: rotateY(-90deg) translateZ(70px); }
+  .robot-right  { transform: rotateY(90deg) translateZ(70px); }
+  .robot-top-side { transform: rotateX(90deg) translateZ(70px); }
+  .robot-bottom-side { transform: rotateX(-90deg) translateZ(70px); }
+
+  .robot-screen {
+    width: 100px;
+    height: 100px;
+  }
+
+  @keyframes robot-3d-lr {
+    0% { transform: translateX(-60px) rotateY(-20deg); }
+    50% { transform: translateX(60px) rotateY(20deg); }
+    100% { transform: translateX(-60px) rotateY(-20deg); }
+  }
+
+  @keyframes robot-3d-rl {
+    0% { transform: translateX(60px) rotateY(20deg); }
+    50% { transform: translateX(-60px) rotateY(-20deg); }
+    100% { transform: translateX(60px) rotateY(20deg); }
+  }
+}
+
   .studio-card-heading {
     flex-direction: column;
   }
