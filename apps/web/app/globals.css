@@ -3222,7 +3222,6 @@ code {
     50% { transform: translateX(-60px) rotateY(-20deg); }
     100% { transform: translateX(60px) rotateY(20deg); }
   }
-}
 
   .studio-card-heading {
     flex-direction: column;
