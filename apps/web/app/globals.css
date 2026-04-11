@@ -1823,9 +1823,11 @@ code {
 .live-pill {
   padding: 0.35rem 0.55rem;
   border-radius: 8px;
-  background: rgba(2, 156, 193, 0.14);
-  color: #8eddec;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: #00f0ff;
   font-size: 0.78rem;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
 }
 
 .console-prompt {
@@ -1849,7 +1851,7 @@ code {
 
 .console-prompt p {
   margin: 0.3rem 0 0;
-  color: rgba(248, 255, 247, 0.86);
+  color: #fff;
   line-height: 1.55;
 }
 
@@ -1922,10 +1924,11 @@ code {
 
 .proof-stat strong {
   display: block;
-  color: #8eddec;
+  color: #00f0ff;
   font-family: var(--font-display);
-  font-size: 2.4rem;
+  font-size: 2.8rem;
   line-height: 1;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
 }
 
 .proof-stat span {
