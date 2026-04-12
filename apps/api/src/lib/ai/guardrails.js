@@ -16,6 +16,24 @@ function getCaptionLengthRule(platform) {
   return { min: 300, max: 900, label: "Instagram" };
 }
 
+function getPlatformPostRule(platform) {
+  const normalized = String(platform || "").toLowerCase();
+
+  if (normalized.includes("youtube")) {
+    return { minHashtags: 3, maxHashtags: 5, minTips: 3, maxTips: 3, maxCtaLength: 120 };
+  }
+
+  if (normalized.includes("twitter") || normalized.includes("x / twitter") || normalized === "x") {
+    return { minHashtags: 0, maxHashtags: 2, minTips: 3, maxTips: 3, maxCtaLength: 90 };
+  }
+
+  if (normalized.includes("linkedin")) {
+    return { minHashtags: 3, maxHashtags: 5, minTips: 3, maxTips: 3, maxCtaLength: 160 };
+  }
+
+  return { minHashtags: 5, maxHashtags: 8, minTips: 3, maxTips: 3, maxCtaLength: 140 };
+}
+
 function validateMonthlyResult(result, expectedCount) {
   if (!result || typeof result !== "object") {
     return { ok: false, error: "Monthly result must be an object" };
@@ -61,6 +79,34 @@ function validatePostResult(result, platform) {
 
   if (!Array.isArray(result.platformTips)) {
     return { ok: false, error: "Post result must include platformTips array" };
+  }
+
+  const platformRule = getPlatformPostRule(platform);
+  if (
+    result.hashtags.length < platformRule.minHashtags ||
+    result.hashtags.length > platformRule.maxHashtags
+  ) {
+    return {
+      ok: false,
+      error: `Post result must include between ${platformRule.minHashtags} and ${platformRule.maxHashtags} hashtags for this platform`,
+    };
+  }
+
+  if (
+    result.platformTips.length < platformRule.minTips ||
+    result.platformTips.length > platformRule.maxTips
+  ) {
+    return {
+      ok: false,
+      error: `Post result must include ${platformRule.minTips} platform tips`,
+    };
+  }
+
+  if (result.cta.trim().length > platformRule.maxCtaLength) {
+    return {
+      ok: false,
+      error: `CTA is too long for this platform`,
+    };
   }
 
   const captionLength = result.caption.trim().length;
