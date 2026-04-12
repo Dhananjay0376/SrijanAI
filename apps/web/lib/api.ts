@@ -4,6 +4,14 @@ export function getApiBaseUrl() {
   return process.env.NEXT_PUBLIC_API_BASE_URL || defaultApiBaseUrl;
 }
 
+async function readJsonSafely(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function generatePreview(input: {
   topic: string;
   platform: string;
@@ -112,9 +120,13 @@ export async function getCalendarsByUser(userId: string) {
     throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
   }
 
-  const payload = await response.json();
+  const payload = await readJsonSafely(response);
 
   if (!response.ok) {
+    if (response.status >= 500) {
+      return [];
+    }
+
     throw new Error(payload?.error || "Failed to fetch calendars");
   }
 
@@ -141,7 +153,7 @@ export async function getCalendarById(id: string) {
     throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
   }
 
-  const payload = await response.json();
+  const payload = await readJsonSafely(response);
 
   if (!response.ok) {
     throw new Error(payload?.error || "Failed to fetch calendar");
@@ -187,7 +199,7 @@ export async function generatePostDetails(input: {
     );
   }
 
-  const payload = await response.json();
+  const payload = await readJsonSafely(response);
 
   if (!response.ok) {
     throw new Error(payload?.error || "Post generation failed");

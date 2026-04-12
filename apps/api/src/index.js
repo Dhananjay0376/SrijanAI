@@ -31,6 +31,30 @@ const {
 
 const server = http.createServer(async (req, res) => {
   try {
+  const isDatabaseUnavailable = (error) => {
+    const message = String(error?.message || "").toLowerCase();
+    const code = String(error?.code || "").toUpperCase();
+
+    return (
+      code === "ETIMEDOUT" ||
+      code === "ECONNREFUSED" ||
+      code === "EHOSTUNREACH" ||
+      code === "ENETUNREACH" ||
+      message.includes("timeout") ||
+      message.includes("connect") ||
+      message.includes("network")
+    );
+  };
+
+  const sendDataAccessError = (error, entity) => {
+    if (isDatabaseUnavailable(error)) {
+      sendError(res, 503, `Database unavailable while fetching ${entity}`, error.message);
+      return;
+    }
+
+    sendError(res, 500, `Failed to fetch ${entity}`, error.message);
+  };
+
   if (req.method === "OPTIONS") {
     res.writeHead(204, getCorsHeaders());
     res.end();
@@ -67,27 +91,32 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && req.url.startsWith("/profiles")) {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const profileId = url.searchParams.get("id");
-    const userId = url.searchParams.get("userId");
+    try {
+      const url = new URL(req.url, `http://${req.headers.host}`);
+      const profileId = url.searchParams.get("id");
+      const userId = url.searchParams.get("userId");
 
-    if (profileId) {
-      const profile = await getProfile(profileId);
-      if (!profile) {
-        sendError(res, 404, "Profile not found");
+      if (profileId) {
+        const profile = await getProfile(profileId);
+        if (!profile) {
+          sendError(res, 404, "Profile not found");
+          return;
+        }
+        sendJson(res, 200, profile);
         return;
       }
-      sendJson(res, 200, profile);
+
+      if (userId) {
+        sendJson(res, 200, await listProfilesByUser(userId));
+        return;
+      }
+
+      sendError(res, 400, "Provide id or userId to fetch profiles");
+      return;
+    } catch (error) {
+      sendDataAccessError(error, "profiles");
       return;
     }
-
-    if (userId) {
-      sendJson(res, 200, await listProfilesByUser(userId));
-      return;
-    }
-
-    sendError(res, 400, "Provide id or userId to fetch profiles");
-    return;
   }
 
   if (req.method === "POST" && req.url === "/calendars") {
@@ -112,27 +141,32 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && req.url.startsWith("/calendars")) {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const calendarId = url.searchParams.get("id");
-    const userId = url.searchParams.get("userId");
+    try {
+      const url = new URL(req.url, `http://${req.headers.host}`);
+      const calendarId = url.searchParams.get("id");
+      const userId = url.searchParams.get("userId");
 
-    if (calendarId) {
-      const calendar = await getCalendar(calendarId);
-      if (!calendar) {
-        sendError(res, 404, "Calendar not found");
+      if (calendarId) {
+        const calendar = await getCalendar(calendarId);
+        if (!calendar) {
+          sendError(res, 404, "Calendar not found");
+          return;
+        }
+        sendJson(res, 200, calendar);
         return;
       }
-      sendJson(res, 200, calendar);
+
+      if (userId) {
+        sendJson(res, 200, await listCalendarsByUser(userId));
+        return;
+      }
+
+      sendError(res, 400, "Provide id or userId to fetch calendars");
+      return;
+    } catch (error) {
+      sendDataAccessError(error, "calendars");
       return;
     }
-
-    if (userId) {
-      sendJson(res, 200, await listCalendarsByUser(userId));
-      return;
-    }
-
-    sendError(res, 400, "Provide id or userId to fetch calendars");
-    return;
   }
 
   if (req.method === "POST" && req.url === "/posts") {
@@ -157,27 +191,32 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && req.url.startsWith("/posts")) {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const postId = url.searchParams.get("id");
-    const calendarId = url.searchParams.get("calendarId");
+    try {
+      const url = new URL(req.url, `http://${req.headers.host}`);
+      const postId = url.searchParams.get("id");
+      const calendarId = url.searchParams.get("calendarId");
 
-    if (postId) {
-      const post = await getPost(postId);
-      if (!post) {
-        sendError(res, 404, "Post not found");
+      if (postId) {
+        const post = await getPost(postId);
+        if (!post) {
+          sendError(res, 404, "Post not found");
+          return;
+        }
+        sendJson(res, 200, post);
         return;
       }
-      sendJson(res, 200, post);
+
+      if (calendarId) {
+        sendJson(res, 200, await listPostsByCalendar(calendarId));
+        return;
+      }
+
+      sendError(res, 400, "Provide id or calendarId to fetch posts");
+      return;
+    } catch (error) {
+      sendDataAccessError(error, "posts");
       return;
     }
-
-    if (calendarId) {
-      sendJson(res, 200, await listPostsByCalendar(calendarId));
-      return;
-    }
-
-    sendError(res, 400, "Provide id or calendarId to fetch posts");
-    return;
   }
 
   if (req.method === "POST" && req.url === "/generate/monthly") {
