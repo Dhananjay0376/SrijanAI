@@ -9,6 +9,18 @@ import {
   RefreshCcw,
   Send,
   Sparkles,
+  BookOpen,
+  Flame,
+  Rocket,
+  Moon,
+  Coins,
+  Dumbbell,
+  Utensils,
+  Zap,
+  ShoppingBag,
+  Laptop,
+  Target,
+  Pencil,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { GlassCard } from "../ui/GlassCard";
@@ -88,24 +100,41 @@ const starters = [
   "Budget AI tools every small business should try",
 ];
 
+const nicheList = [
+  { id: "exams", label: "Exam Tips", icon: <BookOpen size={24} />, color: "emerald" },
+  { id: "motivation", label: "Motivation", icon: <Flame size={24} />, color: "orange" },
+  { id: "startup", label: "Startup", icon: <Rocket size={24} />, color: "blue" },
+  { id: "astrology", label: "Astrology", icon: <Moon size={24} />, color: "violet" },
+  { id: "finance", label: "Finance", icon: <Coins size={24} />, color: "yellow" },
+  { id: "fitness", label: "Fitness", icon: <Dumbbell size={24} />, color: "red" },
+  { id: "cooking", label: "Cooking", icon: <Utensils size={24} />, color: "amber" },
+  { id: "discipline", label: "Self Discipline", icon: <Zap size={24} />, color: "cyan" },
+  { id: "fashion", label: "Fashion", icon: <ShoppingBag size={24} />, color: "pink" },
+  { id: "tech", label: "Tech Tips", icon: <Laptop size={24} />, color: "indigo" },
+  { id: "custom", label: "Custom", icon: <Target size={24} />, color: "slate" },
+];
+
 export function ContentStudio() {
   const { user } = useUser();
   const [platform, setPlatform] = useState("instagram");
   const [topic, setTopic] = useState("");
+  const [niche, setNiche] = useState(nicheList[0].id);
   const [tone, setTone] = useState(tones[0]);
   const [language, setLanguage] = useState(languages[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  const studioMainRef = useRef<HTMLElement>(null);
+  const activeNiche = nicheList.find(n => n.id === niche) ?? nicheList[0];
+  const workbenchRef = useRef<HTMLElement>(null);
 
-  const handleScrollToContent = () => {
-    studioMainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToWorkbench = () => {
+    workbenchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const activePlatform = platforms.find((item) => item.id === platform) ?? platforms[0];
-  const promptScore = Math.min(100, 24 + topic.trim().length * 2);
-  const normalizedTopic = topic.trim() || "5 hidden productivity hacks for Indian students";
+  const currentTopic = niche === "custom" ? (topic || "Your custom idea") : activeNiche.label;
+  const promptScore = Math.min(100, 24 + (niche === "custom" ? topic.length * 2 : 50));
+  const normalizedTopic = currentTopic;
 
   const generatedContent = useMemo(
     () => buildGeneratedContent(normalizedTopic, activePlatform.channel, tone, language),
@@ -201,19 +230,35 @@ export function ContentStudio() {
             <span>{activePlatform.channel}</span>
           </div>
 
-          <div className="studio-field">
-            <label htmlFor="content-topic">What is the topic?</label>
-            <textarea
-              id="content-topic"
-              onChange={(event) => setTopic(event.target.value)}
-              placeholder="e.g. 5 hidden productivity hacks for Indian students..."
-              value={topic}
-            />
-            <div className="studio-helper-row">
-              <span>{topic.trim().length} characters</span>
-              <span>{promptScore}% prompt signal</span>
+          <div className="niche-selector">
+            <p className="section-label">YOUR NICHE</p>
+            <div className="niche-grid">
+              {nicheList.map((item) => (
+                <button
+                  key={item.id}
+                  className={`niche-card niche-${item.color} ${niche === item.id ? 'is-selected' : ''}`}
+                  onClick={() => setNiche(item.id)}
+                  type="button"
+                >
+                  <div className="niche-icon">{item.icon}</div>
+                  <span>{item.label}</span>
+                  {item.id === "custom" && <Pencil size={12} className="custom-indicator" />}
+                </button>
+              ))}
             </div>
           </div>
+
+          {niche === "custom" && (
+            <div className="studio-field custom-input-fade">
+              <label htmlFor="content-topic">What is your custom niche/topic?</label>
+              <textarea
+                id="content-topic"
+                onChange={(event) => setTopic(event.target.value)}
+                placeholder="Describe your niche in detail..."
+                value={topic}
+              />
+            </div>
+          )}
 
           <div className="starter-row" aria-label="Topic starters">
             {starters.map((starter) => (
