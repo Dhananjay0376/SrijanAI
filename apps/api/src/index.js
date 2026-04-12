@@ -13,7 +13,7 @@ const {
 } = require("./modules/calendar");
 const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
 const { notFoundHandler } = require("./modules/not-found");
-const { parseJsonBody, sendError, sendJson } = require("./lib/http");
+const { getCorsHeaders, parseJsonBody, sendError, sendJson } = require("./lib/http");
 const { logEvent } = require("./lib/logger");
 const {
   validateMonthlyResponse,
@@ -31,6 +31,12 @@ const {
 
 const server = http.createServer(async (req, res) => {
   try {
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, getCorsHeaders());
+    res.end();
+    return;
+  }
+
   if (req.url === "/health") {
     return healthHandler(req, res);
   }

@@ -13,6 +13,24 @@ export type SchedulePreview = {
   eligibleDates: Date[];
 };
 
+export type ScheduleGenerationState = {
+  platform: string;
+  niche: string;
+  tone: string;
+  language: string;
+  monthLabel: string;
+  month: string;
+  year: number;
+  distribution: ScheduleDistribution;
+  requestedMonthlyCount: number;
+  generatedAt: string;
+  dates: Array<{
+    isoKey: string;
+    dayNumber: number;
+    title: string;
+  }>;
+};
+
 export type CalendarDay = {
   date: Date;
   dayNumber: number;
@@ -166,4 +184,8 @@ function createIsoDateKey(date: Date) {
   const day = `${date.getDate()}`.padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+export function toIsoDateKey(date: Date) {
+  return createIsoDateKey(date);
 }

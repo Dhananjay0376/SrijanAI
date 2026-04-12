@@ -2,15 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { CalendarDays, Sparkles } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { ScheduleBuilderSection } from "./schedule-builder-section";
 import { generateMonthlyCalendar } from "../../lib/api";
 import {
   buildSchedulePreview,
   sanitizeMonthlyCount,
+  toIsoDateKey,
   type ScheduleDistribution,
+  type ScheduleGenerationState,
 } from "../../lib/schedule";
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -35,6 +37,7 @@ const NICHE_LABELS: Record<string, string> = {
 };
 
 export function CreatePlanSchedule() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [monthlyCountMode, setMonthlyCountMode] = useState<"preset" | "custom">("preset");
   const [selectedMonthlyCount, setSelectedMonthlyCount] = useState(12);
@@ -100,28 +103,45 @@ export function CreatePlanSchedule() {
         language,
       });
 
-      const nextTitlesByDate = preview.highlightedDates.reduce<Record<string, string>>(
-        (accumulator, date, index) => {
-          const title = result.titles[index];
+      const nextTitlesByDate = preview.highlightedDates.reduce<Record<string, string>>((accumulator, date, index) => {
+        const title = result.titles[index];
 
-          if (title) {
-            const year = date.getFullYear();
-            const monthNumber = `${date.getMonth() + 1}`.padStart(2, "0");
-            const dayNumber = `${date.getDate()}`.padStart(2, "0");
-            accumulator[`${year}-${monthNumber}-${dayNumber}`] = title;
-          }
+        if (title) {
+          accumulator[toIsoDateKey(date)] = title;
+        }
 
-          return accumulator;
-        },
-        {},
+        return accumulator;
+      }, {});
+
+      const generatedState: ScheduleGenerationState = {
+        platform: platformLabel,
+        niche: displayTopic,
+        tone,
+        language,
+        monthLabel: preview.monthLabel,
+        month,
+        year: preview.monthStart.getFullYear(),
+        distribution,
+        requestedMonthlyCount,
+        generatedAt: new Date().toISOString(),
+        dates: preview.highlightedDates.map((date, index) => ({
+          isoKey: toIsoDateKey(date),
+          dayNumber: date.getDate(),
+          title: result.titles[index] || "Untitled post",
+        })),
+      };
+
+      window.sessionStorage.setItem(
+        "srijanai.generated-calendar",
+        JSON.stringify(generatedState),
       );
-
-      setGeneratedTitlesByDate(nextTitlesByDate);
       setMetaSummary(
         result.meta?.provider
           ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
           : "AI titles generated for this month.",
       );
+      setGeneratedTitlesByDate(nextTitlesByDate);
+      router.push("/dashboard/create-plan/generated");
     } catch (error) {
       setErrorMessage(
         error instanceof Error

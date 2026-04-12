@@ -1,5 +1,16 @@
+function getCorsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
+}
+
 function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { "Content-Type": "application/json" });
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json",
+    ...getCorsHeaders(),
+  });
   res.end(JSON.stringify(payload));
 }
 
@@ -30,5 +41,4 @@ function parseJsonBody(req) {
   });
 }
 
-module.exports = { sendJson, sendError, parseJsonBody };
-
+module.exports = { getCorsHeaders, sendJson, sendError, parseJsonBody };
