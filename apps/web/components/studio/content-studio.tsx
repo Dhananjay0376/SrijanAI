@@ -196,7 +196,7 @@ export function ContentStudio() {
           <div className="studio-card-heading">
             <div>
               <p className="section-label">Prompt builder</p>
-              <h2>Shape the idea</h2>
+              <h2>Choose your niche</h2>
             </div>
             <span>{activePlatform.channel}</span>
           </div>
