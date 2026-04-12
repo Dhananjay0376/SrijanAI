@@ -107,9 +107,29 @@ function validatePostGeneration(input) {
   return errors;
 }
 
+function validatePreviewGeneration(input) {
+  const errors = [];
+
+  if (!isNonEmptyString(input.topic)) {
+    errors.push("topic is required");
+  }
+  if (!isNonEmptyString(input.platform)) {
+    errors.push("platform is required");
+  }
+  if (!isNonEmptyString(input.tone)) {
+    errors.push("tone is required");
+  }
+  if (!isNonEmptyString(input.language)) {
+    errors.push("language is required");
+  }
+
+  return errors;
+}
+
 module.exports = {
   validateCreatorProfile,
   validateCalendar,
+  validatePreviewGeneration,
   validatePost,
   validateMonthlyGeneration,
   validatePostGeneration,

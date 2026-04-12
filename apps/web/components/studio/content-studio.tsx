@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import { useMemo, useState } from "react";
 import {
   CheckCircle2,
@@ -22,10 +23,14 @@ import {
   Target,
   Pencil,
 } from "lucide-react";
+=======
+import { useMemo, useRef, useState } from "react";
+import { CheckCircle2, Copy, Hash, Loader2, RefreshCcw, Send, Sparkles } from "lucide-react";
+>>>>>>> 2b51383e3ac657791597224922cb10127adab028
 import { useUser } from "@clerk/nextjs";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
-import { useRef } from "react";
+import { generatePreview } from "../../lib/api";
 
 const InstagramIcon = (props: any) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -123,6 +128,7 @@ export function ContentStudio() {
   const [language, setLanguage] = useState(languages[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
+<<<<<<< HEAD
 
   const activeNiche = nicheList.find(n => n.id === niche) ?? nicheList[0];
   const workbenchRef = useRef<HTMLElement>(null);
@@ -142,18 +148,76 @@ export function ContentStudio() {
   );
 
   function handleGenerate() {
+=======
+  const [errorMessage, setErrorMessage] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [generatedDraft, setGeneratedDraft] = useState<ReturnType<typeof buildGeneratedContent> | null>(null);
+  const [generationMeta, setGenerationMeta] = useState<{
+    provider?: string;
+    attempts?: number;
+    durationMs?: number;
+  } | null>(null);
+  const studioMainRef = useRef<HTMLElement>(null);
+
+  const activePlatform = platforms.find((item) => item.id === platform) ?? platforms[0];
+  const promptScore = Math.min(100, 24 + topic.trim().length * 2);
+  const normalizedTopic = topic.trim() || "5 hidden productivity hacks for Indian students";
+  const previewContent = useMemo(
+    () => buildGeneratedContent(normalizedTopic, activePlatform.channel, tone, language),
+    [activePlatform.channel, language, normalizedTopic, tone],
+  );
+  const generatedContent = generatedDraft ?? previewContent;
+
+  const handleScrollToContent = () => {
+    studioMainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  async function handleGenerate() {
+    setCopied(false);
+    setErrorMessage("");
+>>>>>>> 2b51383e3ac657791597224922cb10127adab028
     setIsGenerating(true);
-    window.setTimeout(() => {
+    try {
+      const result = await generatePreview({
+        topic: normalizedTopic,
+        platform: activePlatform.label,
+        tone,
+        language,
+      });
+
+      setGeneratedDraft({
+        title: result.title,
+        body: `${result.hook}\n\n${result.caption}`,
+        tags: result.hashtags?.map((tag) => tag.replace(/^#/, "")) || [],
+      });
+      setGenerationMeta(result.meta ?? null);
       setHasGenerated(true);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to generate content right now.",
+      );
+    } finally {
       setIsGenerating(false);
-    }, 650);
+    }
+  }
+
+  async function handleCopy() {
+    const text = [
+      generatedContent.title,
+      generatedContent.body,
+      generatedContent.tags.map((tag) => `#${tag}`).join(" "),
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
   }
 
   return (
     <main className="studio-shell">
       <div className="cosmic-comets" aria-hidden="true">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className={`comet comet-${i + 1}`} />
+        {Array.from({ length: 12 }).map((_, index) => (
+          <div key={index} className={`comet comet-${index + 1}`} />
         ))}
       </div>
 
@@ -341,10 +405,25 @@ export function ContentStudio() {
             </div>
           </div>
 
+          {errorMessage ? (
+            <p className="studio-helper-row" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
+
+          {generationMeta ? (
+            <p className="studio-helper-row">
+              {generationMeta.provider ? `Provider: ${generationMeta.provider}` : "AI preview ready"}
+              {typeof generationMeta.durationMs === "number"
+                ? ` • ${generationMeta.durationMs}ms`
+                : ""}
+            </p>
+          ) : null}
+
           <div className="studio-action-row">
-            <button type="button">
+            <button onClick={handleCopy} type="button">
               <Copy size={16} />
-              Copy draft
+              {copied ? "Copied" : "Copy draft"}
             </button>
             <button onClick={handleGenerate} type="button">
               <RefreshCcw size={16} />

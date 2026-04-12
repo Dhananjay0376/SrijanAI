@@ -18,10 +18,11 @@ function buildPostPrompt(input) {
     "{ \"title\": \"...\", \"hook\": \"...\", \"caption\": \"...\", \"hashtags\": [\"#\"], \"cta\": \"...\", \"platformTips\": [\"...\"] }",
     `Platform: ${input.platform}`,
     `Tone: ${input.tone}`,
+    `Language: ${input.language || "English"}`,
     `Day: ${input.day}`,
-    `Title: ${input.title || "Generate a title"}`,
+    `Title: ${input.title || input.topic || "Generate a title"}`,
+    `Topic: ${input.topic || input.title || "General creator content"}`,
   ].join("\n");
 }
 
 module.exports = { buildMonthlyPrompt, buildPostPrompt };
-
