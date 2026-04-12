@@ -22,7 +22,7 @@ export function DashboardHome({
       <section className="dashboard-intro">
         <p className="section-label">DASHBOARD</p>
         <h1 className="dashboard-greeting">
-          Good morning, {firstName ?? "Creator"} ☀️
+          Good morning, {firstName ?? "Creator"}
         </h1>
         {initialCalendars.length === 0 ? (
           <div className="dashboard-empty-state">

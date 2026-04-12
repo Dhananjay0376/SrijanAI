@@ -74,6 +74,7 @@ async function runWithFallback(taskName, input) {
         };
       }
     } catch (error) {
+      console.error(`[AI Router] Provider failed:`, error.message);
       lastError = error;
     }
   }
