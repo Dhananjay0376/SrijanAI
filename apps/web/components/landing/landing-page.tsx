@@ -2,36 +2,62 @@
 
 import { ArrowRight } from "lucide-react";
 import { NeonButton } from "../ui/NeonButton";
+import { AnimatedBackground } from "./animated-background";
+import { motion } from "framer-motion";
 
 export default function LandingPage() {
   return (
     <main className="landing-shell">
-      <div className="cosmic-comets" aria-hidden="true">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className={`comet comet-${i + 1}`} />
-        ))}
-      </div>
+      <AnimatedBackground />
       <section className="landing-hero" aria-labelledby="landing-title">
-        <div className="landing-hero-copy">
-          <p className="landing-kicker">AI x CONTENT x INDIA</p>
-          <h1 id="landing-title">
+        <motion.div 
+          className="landing-hero-copy"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <motion.p 
+            className="landing-kicker"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            AI × CONTENT × INDIA
+          </motion.p>
+          <motion.h1 
+            id="landing-title"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.8, type: "spring", stiffness: 100 }}
+          >
             Your Content.
             <br />
             Every Month.
             <br />
             <span className="landing-hero-accent">Automated.</span>
-          </h1>
-          <p className="landing-hero-text">
-            India ka pehla AI Content Planner - Hindi, English aur Hinglish mein
+          </motion.h1>
+          <motion.p 
+            className="landing-hero-text"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+          >
+            India ka pehla AI Content Planner — Hindi, English aur Hinglish mein
             Instagram, YouTube aur LinkedIn ke liye posts automatically
             generate karta hai.
-          </p>
-          <div className="landing-actions" aria-label="Primary actions">
+          </motion.p>
+          <motion.div 
+            className="landing-actions" 
+            aria-label="Primary actions"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+          >
             <NeonButton href="/sign-up">
               Start for Free <ArrowRight size={18} />
             </NeonButton>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
     </main>
   );
