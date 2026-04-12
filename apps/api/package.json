@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "node ./src/index.js",
+    "db:verify": "node ./scripts/verify-db.js",
     "build": "node -e \"console.log('API scaffold has no build step yet')\"",
     "lint": "node -e \"console.log('API scaffold has no lint step yet')\""
   },
   "dependencies": {
     "@srijanai/db": "*",
-    "drizzle-orm": "^0.44.5"
+    "dotenv": "^17.4.1",
+    "drizzle-orm": "^0.44.5",
+    "pg": "^8.20.0"
   }
 }

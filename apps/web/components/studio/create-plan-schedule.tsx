@@ -40,7 +40,7 @@ const NICHE_LABELS: Record<string, string> = {
 export function CreatePlanSchedule() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { userId } = useAuth();
+  const { isLoaded, userId } = useAuth();
   const [monthlyCountMode, setMonthlyCountMode] = useState<"preset" | "custom">("preset");
   const [selectedMonthlyCount, setSelectedMonthlyCount] = useState(12);
   const [customMonthlyCount, setCustomMonthlyCount] = useState("18");
@@ -86,6 +86,16 @@ export function CreatePlanSchedule() {
   }, [highlightedSignature]);
 
   async function handleGenerateCalendar() {
+    if (!isLoaded) {
+      setErrorMessage("Checking your sign-in session. Please wait a moment and try again.");
+      return;
+    }
+
+    if (!userId) {
+      setErrorMessage("You need to be signed in before generating a calendar.");
+      return;
+    }
+
     setIsGenerating(true);
     setErrorMessage("");
     setMetaSummary("");
@@ -95,7 +105,7 @@ export function CreatePlanSchedule() {
         preview.monthStart,
       );
       const result = await generateMonthlyCalendar({
-        userId: userId || "anonymous",
+        userId,
         profileId: "create-plan-schedule",
         month,
         year: preview.monthStart.getFullYear(),
@@ -220,6 +230,7 @@ export function CreatePlanSchedule() {
           generatedTitlesByDate={generatedTitlesByDate}
           hasGenerated={Object.keys(generatedTitlesByDate).length > 0}
           isGenerating={isGenerating}
+          canGenerate={isLoaded && Boolean(userId)}
           errorMessage={errorMessage}
           metaSummary={metaSummary}
           onCustomMonthlyCountChange={(value) => {
