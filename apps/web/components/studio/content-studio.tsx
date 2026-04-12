@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   BookOpen,
+  CalendarDays,
   CheckCircle2,
   Coins,
   Copy,
@@ -22,7 +23,6 @@ import {
   Utensils,
   Zap,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
 import { generatePreview } from "../../lib/api";
@@ -94,12 +94,6 @@ const platforms = [
 const tones = ["Energetic (Gen Z)", "Professional", "Informative", "Funny/Sarcastic"];
 const languages = ["Hinglish", "English", "Hindi"];
 
-const starters = [
-  "5 hidden productivity hacks for Indian students",
-  "How solo creators can plan 30 days of content",
-  "Budget AI tools every small business should try",
-];
-
 const nicheList = [
   { id: "exams", label: "Exam Tips", icon: <BookOpen size={24} />, color: "emerald" },
   { id: "motivation", label: "Motivation", icon: <Flame size={24} />, color: "orange" },
@@ -115,7 +109,6 @@ const nicheList = [
 ];
 
 export function ContentStudio() {
-  const { user } = useUser();
   const [platform, setPlatform] = useState("instagram");
   const [topic, setTopic] = useState("");
   const [niche, setNiche] = useState(nicheList[0].id);
@@ -131,7 +124,6 @@ export function ContentStudio() {
     attempts?: number;
     durationMs?: number;
   } | null>(null);
-  const workbenchRef = useRef<HTMLElement>(null);
 
   const activeNiche = nicheList.find((item) => item.id === niche) ?? nicheList[0];
   const activePlatform = platforms.find((item) => item.id === platform) ?? platforms[0];
@@ -143,10 +135,6 @@ export function ContentStudio() {
     [activePlatform.channel, language, normalizedTopic, tone],
   );
   const generatedContent = generatedDraft ?? previewContent;
-
-  const scrollToWorkbench = () => {
-    workbenchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   async function handleGenerate() {
     setCopied(false);
@@ -197,28 +185,6 @@ export function ContentStudio() {
           <div key={index} className={`comet comet-${index + 1}`} />
         ))}
       </div>
-
-      <section className="dashboard-intro">
-        <p className="section-label">DASHBOARD</p>
-        <h1 className="dashboard-greeting">
-          Good morning, {user?.firstName ?? "Creator"} ☀️
-        </h1>
-        <p className="dashboard-subtitle">Create your first content plan to get started.</p>
-
-        <div className="dashboard-empty-state">
-          <div className="empty-state-box">
-            <div className="empty-state-icon">
-              <Sparkles size={24} />
-            </div>
-            <h2>No plans yet</h2>
-            <button className="create-plan-button" onClick={scrollToWorkbench} type="button">
-              + Create First Plan
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <div className="content-anchor" ref={workbenchRef as any} />
 
       <section className="studio-hero">
         <div>
@@ -303,14 +269,6 @@ export function ContentStudio() {
             </div>
           ) : null}
 
-          <div className="starter-row" aria-label="Topic starters">
-            {starters.map((starter) => (
-              <button key={starter} onClick={() => setTopic(starter)} type="button">
-                {starter}
-              </button>
-            ))}
-          </div>
-
           <div className="studio-select-grid">
             <div className="studio-field">
               <label htmlFor="content-tone">Tone</label>
@@ -351,8 +309,8 @@ export function ContentStudio() {
               </>
             ) : (
               <>
-                Generate Content
-                <Sparkles size={18} />
+                Set Schedule
+                <CalendarDays size={18} />
               </>
             )}
           </NeonButton>

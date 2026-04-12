@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { ContentStudio } from "../../components/studio/content-studio";
+import { currentUser } from "@clerk/nextjs/server";
+import { DashboardHome } from "../../components/studio/dashboard-home";
 import { hasClerkEnv } from "../../lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +12,11 @@ export default async function DashboardPage() {
   }
 
   const { userId } = await auth();
+  const user = await currentUser();
 
   if (!userId) {
     redirect("/sign-in");
   }
 
-  return <ContentStudio />;
+  return <DashboardHome firstName={user?.firstName} />;
 }
