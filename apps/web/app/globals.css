@@ -2695,6 +2695,89 @@ code {
   align-items: center;
   margin-bottom: 2.5rem;
   position: relative;
+.dashboard-intro {
+  margin-bottom: 5rem;
+  animation: landing-rise 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-greeting {
+  margin: 0.5rem 0 0.8rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-subtitle {
+  color: rgba(230, 240, 255, 0.6);
+  font-size: 1.15rem;
+  margin-bottom: 3rem;
+}
+
+.dashboard-empty-state {
+  width: 100%;
+  padding: 5rem 2rem;
+  border-radius: var(--radius-lg);
+  border: 2px dashed rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: all 0.4s ease;
+}
+
+.dashboard-empty-state:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.025);
+  transform: translateY(-5px);
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 1.5rem;
+  color: #a0c4ff;
+  box-shadow: 0 0 20px rgba(160, 196, 255, 0.2);
+}
+
+.empty-state-box h2 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.empty-state-box p {
+  color: rgba(230, 240, 255, 0.6);
+  margin-bottom: 2.5rem;
+}
+
+.create-plan-button {
+  padding: 0.9rem 2rem;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, #ffd700 0%, #ffae42 100%);
+  color: #000;
+  font-weight: 800;
+  font-size: 1.05rem;
+  box-shadow: 0 10px 30px rgba(255, 174, 66, 0.25);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.create-plan-button:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 15px 40px rgba(255, 174, 66, 0.4);
+}
+
+.content-anchor {
+  height: 1px;
+  margin-bottom: 2rem;
 }
 
 .studio-kicker {

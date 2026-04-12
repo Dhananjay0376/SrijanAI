@@ -10,8 +10,10 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
+import { useRef } from "react";
 
 const InstagramIcon = (props: any) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -87,12 +89,19 @@ const starters = [
 ];
 
 export function ContentStudio() {
+  const { user } = useUser();
   const [platform, setPlatform] = useState("instagram");
   const [topic, setTopic] = useState("");
   const [tone, setTone] = useState(tones[0]);
   const [language, setLanguage] = useState(languages[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
+
+  const studioMainRef = useRef<HTMLElement>(null);
+
+  const handleScrollToContent = () => {
+    studioMainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const activePlatform = platforms.find((item) => item.id === platform) ?? platforms[0];
   const promptScore = Math.min(100, 24 + topic.trim().length * 2);
@@ -118,6 +127,30 @@ export function ContentStudio() {
           <div key={i} className={`comet comet-${i + 1}`} />
         ))}
       </div>
+
+      <section className="dashboard-intro">
+        <p className="section-label">DASHBOARD</p>
+        <h1 className="dashboard-greeting">
+          Good morning, {user?.firstName ?? "Creator"} ☀️
+        </h1>
+        <p className="dashboard-subtitle">Create your first content plan to get started.</p>
+
+        <div className="dashboard-empty-state">
+          <div className="empty-state-box">
+            <div className="empty-state-icon">
+              <Sparkles size={24} />
+            </div>
+            <h2>No plans yet</h2>
+            <p>Create your first AI content plan to get started</p>
+            <button className="create-plan-button" onClick={handleScrollToContent}>
+              + Create First Plan
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div className="content-anchor" ref={studioMainRef as any} />
+
       <section className="studio-hero">
         <div>
           <p className="studio-kicker">
