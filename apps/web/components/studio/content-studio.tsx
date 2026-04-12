@@ -1,32 +1,27 @@
 "use client";
 
-<<<<<<< HEAD
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
-  CheckCircle2,
-  Copy,
-  Hash,
-  Loader2,
-  RefreshCcw,
-  Send,
-  Sparkles,
   BookOpen,
-  Flame,
-  Rocket,
-  Moon,
+  CheckCircle2,
   Coins,
+  Copy,
   Dumbbell,
+  Flame,
+  Hash,
+  Laptop,
+  Loader2,
+  Moon,
+  Pencil,
+  RefreshCcw,
+  Rocket,
+  Send,
+  ShoppingBag,
+  Sparkles,
+  Target,
   Utensils,
   Zap,
-  ShoppingBag,
-  Laptop,
-  Target,
-  Pencil,
 } from "lucide-react";
-=======
-import { useMemo, useRef, useState } from "react";
-import { CheckCircle2, Copy, Hash, Loader2, RefreshCcw, Send, Sparkles } from "lucide-react";
->>>>>>> 2b51383e3ac657791597224922cb10127adab028
 import { useUser } from "@clerk/nextjs";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
@@ -128,27 +123,6 @@ export function ContentStudio() {
   const [language, setLanguage] = useState(languages[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
-<<<<<<< HEAD
-
-  const activeNiche = nicheList.find(n => n.id === niche) ?? nicheList[0];
-  const workbenchRef = useRef<HTMLElement>(null);
-
-  const scrollToWorkbench = () => {
-    workbenchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const activePlatform = platforms.find((item) => item.id === platform) ?? platforms[0];
-  const currentTopic = niche === "custom" ? (topic || "Your custom idea") : activeNiche.label;
-  const promptScore = Math.min(100, 24 + (niche === "custom" ? topic.length * 2 : 50));
-  const normalizedTopic = currentTopic;
-
-  const generatedContent = useMemo(
-    () => buildGeneratedContent(normalizedTopic, activePlatform.channel, tone, language),
-    [activePlatform.channel, language, normalizedTopic, tone],
-  );
-
-  function handleGenerate() {
-=======
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [generatedDraft, setGeneratedDraft] = useState<ReturnType<typeof buildGeneratedContent> | null>(null);
@@ -157,26 +131,28 @@ export function ContentStudio() {
     attempts?: number;
     durationMs?: number;
   } | null>(null);
-  const studioMainRef = useRef<HTMLElement>(null);
+  const workbenchRef = useRef<HTMLElement>(null);
 
+  const activeNiche = nicheList.find((item) => item.id === niche) ?? nicheList[0];
   const activePlatform = platforms.find((item) => item.id === platform) ?? platforms[0];
-  const promptScore = Math.min(100, 24 + topic.trim().length * 2);
-  const normalizedTopic = topic.trim() || "5 hidden productivity hacks for Indian students";
+  const currentTopic = niche === "custom" ? (topic.trim() || "Your custom idea") : activeNiche.label;
+  const promptScore = Math.min(100, 24 + (niche === "custom" ? topic.trim().length * 2 : 50));
+  const normalizedTopic = currentTopic;
   const previewContent = useMemo(
     () => buildGeneratedContent(normalizedTopic, activePlatform.channel, tone, language),
     [activePlatform.channel, language, normalizedTopic, tone],
   );
   const generatedContent = generatedDraft ?? previewContent;
 
-  const handleScrollToContent = () => {
-    studioMainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToWorkbench = () => {
+    workbenchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   async function handleGenerate() {
     setCopied(false);
     setErrorMessage("");
->>>>>>> 2b51383e3ac657791597224922cb10127adab028
     setIsGenerating(true);
+
     try {
       const result = await generatePreview({
         topic: normalizedTopic,
@@ -209,6 +185,7 @@ export function ContentStudio() {
     ]
       .filter(Boolean)
       .join("\n\n");
+
     await navigator.clipboard.writeText(text);
     setCopied(true);
   }
@@ -234,7 +211,7 @@ export function ContentStudio() {
               <Sparkles size={24} />
             </div>
             <h2>No plans yet</h2>
-            <button className="create-plan-button" onClick={scrollToWorkbench}>
+            <button className="create-plan-button" onClick={scrollToWorkbench} type="button">
               + Create First Plan
             </button>
           </div>
@@ -300,19 +277,21 @@ export function ContentStudio() {
               {nicheList.map((item) => (
                 <button
                   key={item.id}
-                  className={`niche-card niche-${item.color} ${niche === item.id ? 'is-selected' : ''}`}
+                  className={`niche-card niche-${item.color} ${niche === item.id ? "is-selected" : ""}`}
                   onClick={() => setNiche(item.id)}
                   type="button"
                 >
                   <div className="niche-icon">{item.icon}</div>
                   <span>{item.label}</span>
-                  {item.id === "custom" && <Pencil size={12} className="custom-indicator" />}
+                  {item.id === "custom" ? (
+                    <Pencil size={12} className="custom-indicator" />
+                  ) : null}
                 </button>
               ))}
             </div>
           </div>
 
-          {niche === "custom" && (
+          {niche === "custom" ? (
             <div className="studio-field custom-input-fade">
               <label htmlFor="content-topic">What is your custom niche/topic?</label>
               <textarea
@@ -322,7 +301,7 @@ export function ContentStudio() {
                 value={topic}
               />
             </div>
-          )}
+          ) : null}
 
           <div className="starter-row" aria-label="Topic starters">
             {starters.map((starter) => (
