@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import { GlassCard } from "../ui/GlassCard";
 import { ScheduleBuilderSection } from "./schedule-builder-section";
 import { generateMonthlyCalendar } from "../../lib/api";
@@ -39,6 +40,7 @@ const NICHE_LABELS: Record<string, string> = {
 export function CreatePlanSchedule() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { userId } = useAuth();
   const [monthlyCountMode, setMonthlyCountMode] = useState<"preset" | "custom">("preset");
   const [selectedMonthlyCount, setSelectedMonthlyCount] = useState(12);
   const [customMonthlyCount, setCustomMonthlyCount] = useState("18");
@@ -93,13 +95,14 @@ export function CreatePlanSchedule() {
         preview.monthStart,
       );
       const result = await generateMonthlyCalendar({
+        userId: userId || "anonymous",
         profileId: "create-plan-schedule",
         month,
         year: preview.monthStart.getFullYear(),
         selectedDays: preview.highlightedDates.map((date) => date.getDate()),
         niche: displayTopic,
         platform: platformLabel,
-        tone,
+        tone: tone,
         language,
       });
 
@@ -141,7 +144,12 @@ export function CreatePlanSchedule() {
           : "AI titles generated for this month.",
       );
       setGeneratedTitlesByDate(nextTitlesByDate);
-      router.push("/dashboard/create-plan/generated");
+      
+      if (result.calendar?.id) {
+        router.push(`/dashboard/calendar/${result.calendar.id}`);
+      } else {
+        router.push("/dashboard/create-plan/generated");
+      }
     } catch (error) {
       setErrorMessage(
         error instanceof Error

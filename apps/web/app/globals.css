@@ -3989,3 +3989,83 @@ code {
     flex-direction: column;
   }
 }
+@layer components {
+  .dashboard-grid {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .grid-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .plan-card-link {
+    display: block;
+    transition: transform var(--transition-smooth);
+  }
+
+  .plan-card-link:hover {
+    transform: translateY(-4px);
+  }
+
+  .plan-card {
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .plan-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .plan-card-month {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .plan-card-year {
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .plan-card-stats {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  .create-plan-button-small {
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 0.88rem;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 20px rgba(2, 156, 193, 0.2);
+  }
+
+  .create-plan-button-small:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(2, 156, 193, 0.3);
+  }
+}

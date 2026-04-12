@@ -48,6 +48,7 @@ export async function generatePreview(input: {
 }
 
 export async function generateMonthlyCalendar(input: {
+  userId: string;
   profileId: string;
   month: string;
   year: number;
@@ -81,11 +82,83 @@ export async function generateMonthlyCalendar(input: {
 
   return payload as {
     titles: string[];
+    calendar: {
+      id: string;
+      userId: string;
+      month: string;
+      year: number;
+      days: Array<{
+        id: string;
+        date: string;
+        status: string;
+        title: string | null;
+        postId: string | null;
+      }>;
+    };
     meta?: {
       provider?: string;
       attempts?: number;
       durationMs?: number;
     };
+  };
+}
+
+export async function getCalendarsByUser(userId: string) {
+  let response: Response;
+
+  try {
+    response = await fetch(`${getApiBaseUrl()}/calendars?userId=${userId}`);
+  } catch {
+    throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Failed to fetch calendars");
+  }
+
+  return payload as Array<{
+    id: string;
+    userId: string;
+    month: string;
+    year: number;
+    days: Array<{
+      date: string;
+      status: string;
+      title: string;
+    }>;
+    createdAt: string;
+  }>;
+}
+
+export async function getCalendarById(id: string) {
+  let response: Response;
+
+  try {
+    response = await fetch(`${getApiBaseUrl()}/calendars?id=${id}`);
+  } catch {
+    throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Failed to fetch calendar");
+  }
+
+  return payload as {
+    id: string;
+    userId: string;
+    month: string;
+    year: number;
+    days: Array<{
+      id: string;
+      date: string;
+      status: string;
+      title: string | null;
+      postId: string | null;
+    }>;
   };
 }
 
