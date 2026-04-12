@@ -1,36 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { Show } from "@clerk/nextjs";
 import { NeonButton } from "../ui/NeonButton";
-import { hasClerkPublishableKey } from "../../lib/auth";
 
 export default function LandingPage() {
-  const ctaRef = useRef<HTMLElement | null>(null);
-  const [ctaVisible, setCtaVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ctaRef.current;
-    if (!node) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setCtaVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 },
-    );
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <main className="landing-shell">
       <div className="cosmic-comets" aria-hidden="true">
@@ -59,41 +32,6 @@ export default function LandingPage() {
             </NeonButton>
           </div>
         </div>
-      </section>
-
-      <section
-        aria-labelledby="landing-bottom-cta-title"
-        className={`landing-bottom-cta ${ctaVisible ? "is-visible" : ""}`}
-        ref={ctaRef}
-      >
-        {hasClerkPublishableKey ? (
-          <Show when="signed-out">
-            <div className="landing-bottom-cta-inner">
-              <h2 id="landing-bottom-cta-title">
-                Start Your <span>Content Journey</span>
-              </h2>
-              <p>
-                Join thousands of Indian micro-creators automating their
-                content.
-              </p>
-              <NeonButton className="landing-bottom-cta-button" href="/sign-up">
-                Create Free Account <ArrowRight size={18} />
-              </NeonButton>
-            </div>
-          </Show>
-        ) : (
-          <div className="landing-bottom-cta-inner">
-            <h2 id="landing-bottom-cta-title">
-              Start Your <span>Content Journey</span>
-            </h2>
-            <p>
-              Join thousands of Indian micro-creators automating their content.
-            </p>
-            <NeonButton className="landing-bottom-cta-button" href="/sign-up">
-              Create Free Account <ArrowRight size={18} />
-            </NeonButton>
-          </div>
-        )}
       </section>
     </main>
   );
