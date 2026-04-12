@@ -1,3 +1,5 @@
+require("dotenv").config({ path: [".env.local", ".env"] });
+
 const http = require("node:http");
 const { dbHealthHandler, healthHandler } = require("./modules/health");
 const {
@@ -58,6 +60,62 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     res.writeHead(204, getCorsHeaders());
     res.end();
+    return;
+  }
+
+  if (req.method === "GET" && (req.url === "/" || req.url === "")) {
+    const headers = getCorsHeaders();
+    headers["Content-Type"] = "text/html";
+    res.writeHead(200, headers);
+    res.end(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>SrijanAI API</title>
+        <style>
+          body { 
+            background: #051110; color: #029cc1; 
+            font-family: 'Inter', system-ui, sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; 
+          }
+          .container { 
+            text-align: center; 
+            padding: 40px;
+            border: 1px solid rgba(2, 156, 193, 0.2);
+            border-radius: 12px;
+            background: rgba(5, 17, 16, 0.6);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(2, 156, 193, 0.1);
+          }
+          h1 { 
+            font-size: 2.5rem; margin: 0 0 10px; 
+            color: #29b8b0; 
+            text-shadow: 0 0 15px rgba(41, 184, 176, 0.5); 
+          }
+          p { font-size: 1.1rem; opacity: 0.8; margin-bottom: 25px; }
+          .btn { 
+            color: #029cc1; text-decoration: none; 
+            border: 1px solid #029cc1; padding: 12px 24px; 
+            border-radius: 6px; display: inline-block; 
+            transition: all 0.3s; font-weight: 500;
+          }
+          .btn:hover { 
+            background: #029cc1; color: #051110; 
+            box-shadow: 0 0 20px rgba(2, 156, 193, 0.6); 
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>SrijanAI Core API</h1>
+          <p>Gateway is online and successfully routing traffic.</p>
+          <a class="btn" href="/health">Check System Health</a>
+        </div>
+      </body>
+      </html>
+    `);
     return;
   }
 
