@@ -170,7 +170,7 @@ export function ContentStudio() {
               <Sparkles size={24} />
             </div>
             <h2>No plans yet</h2>
-            <button className="create-plan-button" onClick={handleScrollToContent}>
+            <button className="create-plan-button" onClick={scrollToWorkbench}>
               + Create First Plan
             </button>
           </div>
