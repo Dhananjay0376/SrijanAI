@@ -84,6 +84,13 @@ function validateMonthlyGeneration(input) {
   if (!Array.isArray(input.selectedDays) || input.selectedDays.length === 0) {
     errors.push("selectedDays must be a non-empty array");
   }
+  if (
+    input.previousTitles !== undefined &&
+    (!Array.isArray(input.previousTitles) ||
+      input.previousTitles.some((title) => !isNonEmptyString(title)))
+  ) {
+    errors.push("previousTitles must be an array of non-empty strings");
+  }
 
   return errors;
 }

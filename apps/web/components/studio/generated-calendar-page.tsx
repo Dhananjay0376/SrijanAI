@@ -4,8 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "../ui/GlassCard";
-import { generatePostDetails, listPostsByCalendar } from "../../lib/api";
-import { type ScheduleGenerationState } from "../../lib/schedule";
+import { generateMonthlyCalendar, generatePostDetails, listPostsByCalendar } from "../../lib/api";
+import {
+  buildSchedulePreviewForMonth,
+  inferScheduleDistributionFromDates,
+  type ScheduleGenerationState,
+} from "../../lib/schedule";
 import { GeneratedCalendarBoard } from "./generated-calendar-board";
 
 type PostStatus = "pending" | "confirmed" | "declined";
@@ -19,6 +23,12 @@ type GeneratedPostDetailsState = {
   platformTips: string[];
   metaSummary?: string;
 };
+
+const GENERATED_CALENDAR_STORAGE_KEY = "srijanai.generated-calendar";
+
+function getCalendarContextStorageKey(calendarId: string) {
+  return `srijanai.calendar-context:${calendarId}`;
+}
 
 export function GeneratedCalendarPage({
   initialData,
@@ -43,6 +53,7 @@ export function GeneratedCalendarPage({
   const [errorMessage, setErrorMessage] = useState("");
   const [statuses, setStatuses] = useState<Record<string, PostStatus>>({});
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [isContinuingMonth, setIsContinuingMonth] = useState(false);
   const [generatedPosts, setGeneratedPosts] = useState<Record<string, GeneratedPostDetailsState>>(
     {},
   );
@@ -66,17 +77,29 @@ export function GeneratedCalendarPage({
 
   useEffect(() => {
     if (initialData) {
+      let parsedContext: ScheduleGenerationState | null = null;
+      const storedContext =
+        typeof window !== "undefined" && initialData.id
+          ? window.sessionStorage.getItem(getCalendarContextStorageKey(initialData.id))
+          : null;
+      if (storedContext) {
+        try {
+          parsedContext = JSON.parse(storedContext) as ScheduleGenerationState;
+        } catch {
+          parsedContext = null;
+        }
+      }
       const mappedData: ScheduleGenerationState = {
-        platform: initialData.platform || "Instagram",
-        niche: initialData.niche || "Exam Tips",
-        tone: initialData.tone || "Energetic",
-        language: initialData.language || "Hinglish",
+        platform: parsedContext?.platform || initialData.platform || "Instagram",
+        niche: parsedContext?.niche || initialData.niche || "Exam Tips",
+        tone: parsedContext?.tone || initialData.tone || "Energetic",
+        language: parsedContext?.language || initialData.language || "Hinglish",
         monthLabel: `${initialData.month} ${initialData.year}`,
         month: initialData.month,
         year: initialData.year,
-        distribution: "mon-wed-fri", // Default or fetch from somewhere
-        requestedMonthlyCount: initialData.days?.length || 0,
-        generatedAt: initialData.createdAt || new Date().toISOString(),
+        distribution: parsedContext?.distribution || "mon-wed-fri",
+        requestedMonthlyCount: parsedContext?.requestedMonthlyCount || initialData.days?.length || 0,
+        generatedAt: parsedContext?.generatedAt || initialData.createdAt || new Date().toISOString(),
         dates: (initialData.days || []).map((day: any) => ({
           isoKey: day.date,
           dayNumber: parseInt(day.date.split("-")[2], 10),
@@ -228,6 +251,101 @@ export function GeneratedCalendarPage({
     }
   }
 
+  async function handleContinueToNextMonth() {
+    if (!data || !initialData?.id || !initialData?.userId) {
+      return;
+    }
+
+    const currentDates = data.dates.map((item) => new Date(`${item.isoKey}T00:00:00`));
+    if (currentDates.length === 0) {
+      return;
+    }
+
+    const inferredDistribution =
+      inferScheduleDistributionFromDates(currentDates) || data.distribution;
+    const currentMonthStart = new Date(
+      currentDates[0].getFullYear(),
+      currentDates[0].getMonth(),
+      1,
+    );
+    const nextMonthStart = new Date(
+      currentMonthStart.getFullYear(),
+      currentMonthStart.getMonth() + 1,
+      1,
+    );
+    const nextPreview = buildSchedulePreviewForMonth(
+      data.requestedMonthlyCount,
+      inferredDistribution,
+      nextMonthStart,
+    );
+
+    setIsContinuingMonth(true);
+    setErrorMessage("");
+
+    try {
+      const nextMonth = new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+        nextMonthStart,
+      );
+      const previousTitles = Array.from(
+        new Set(
+          data.dates
+            .map((item) => item.title.trim())
+            .filter((title) => title.length > 0),
+        ),
+      );
+      const result = await generateMonthlyCalendar({
+        userId: initialData.userId,
+        profileId: `continue-${initialData.id}`,
+        month: nextMonth,
+        year: nextMonthStart.getFullYear(),
+        selectedDays: nextPreview.highlightedDates.map((date) => date.getDate()),
+        niche: data.niche,
+        platform: data.platform,
+        tone: data.tone,
+        language: data.language,
+        previousTitles,
+      });
+
+      const nextState: ScheduleGenerationState = {
+        platform: data.platform,
+        niche: data.niche,
+        tone: data.tone,
+        language: data.language,
+        monthLabel: nextPreview.monthLabel,
+        month: nextMonth,
+        year: nextMonthStart.getFullYear(),
+        distribution: inferredDistribution,
+        requestedMonthlyCount: nextPreview.highlightedDates.length,
+        generatedAt: new Date().toISOString(),
+        dates: nextPreview.highlightedDates.map((date, index) => ({
+          isoKey: `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`,
+          dayNumber: date.getDate(),
+          title: result.titles[index] || "Untitled post",
+        })),
+      };
+
+      window.sessionStorage.setItem(GENERATED_CALENDAR_STORAGE_KEY, JSON.stringify(nextState));
+      if (result.calendar?.id) {
+        window.sessionStorage.setItem(
+          getCalendarContextStorageKey(result.calendar.id),
+          JSON.stringify(nextState),
+        );
+        router.push(`/dashboard/calendar/${result.calendar.id}`);
+        return;
+      }
+
+      router.push("/dashboard/create-plan/generated");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to continue this calendar into the next month.",
+      );
+    } finally {
+      setIsContinuingMonth(false);
+    }
+  }
+
   if (!data) {
     return (
       <main className="studio-shell">
@@ -295,11 +413,21 @@ export function GeneratedCalendarPage({
             <Link className="schedule-back-link" href="/dashboard/create-plan/schedule">
               Back to schedule
             </Link>
+            {initialData?.id ? (
+              <button
+                type="button"
+                className="schedule-back-link"
+                disabled={isContinuingMonth}
+                onClick={handleContinueToNextMonth}
+              >
+                {isContinuingMonth ? "Continuing..." : "Continue to next month"}
+              </button>
+            ) : null}
             <button
               type="button"
               className="schedule-back-link"
               onClick={() => {
-                window.sessionStorage.removeItem("srijanai.generated-calendar");
+                window.sessionStorage.removeItem(GENERATED_CALENDAR_STORAGE_KEY);
                 router.push("/dashboard/create-plan");
               }}
             >

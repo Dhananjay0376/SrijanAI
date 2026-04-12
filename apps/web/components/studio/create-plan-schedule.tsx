@@ -16,6 +16,12 @@ import {
   type ScheduleGenerationState,
 } from "../../lib/schedule";
 
+const GENERATED_CALENDAR_STORAGE_KEY = "srijanai.generated-calendar";
+
+function getCalendarContextStorageKey(calendarId: string) {
+  return `srijanai.calendar-context:${calendarId}`;
+}
+
 const PLATFORM_LABELS: Record<string, string> = {
   instagram: "Instagram",
   youtube: "YouTube",
@@ -144,10 +150,13 @@ export function CreatePlanSchedule() {
         })),
       };
 
-      window.sessionStorage.setItem(
-        "srijanai.generated-calendar",
-        JSON.stringify(generatedState),
-      );
+      window.sessionStorage.setItem(GENERATED_CALENDAR_STORAGE_KEY, JSON.stringify(generatedState));
+      if (result.calendar?.id) {
+        window.sessionStorage.setItem(
+          getCalendarContextStorageKey(result.calendar.id),
+          JSON.stringify(generatedState),
+        );
+      }
       setMetaSummary(
         result.warning
           ? result.meta?.provider

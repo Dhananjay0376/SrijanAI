@@ -34,7 +34,15 @@ function getPlatformPostRule(platform) {
   return { minHashtags: 5, maxHashtags: 8, minTips: 3, maxTips: 3, maxCtaLength: 140 };
 }
 
-function validateMonthlyResult(result, expectedCount) {
+function normalizeTitle(title) {
+  return String(title || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function validateMonthlyResult(result, expectedCount, forbiddenTitles = []) {
   if (!result || typeof result !== "object") {
     return { ok: false, error: "Monthly result must be an object" };
   }
@@ -56,6 +64,30 @@ function validateMonthlyResult(result, expectedCount) {
 
   if (invalidTitle) {
     return { ok: false, error: "Monthly titles must be non-empty strings" };
+  }
+
+  const seenTitles = new Set();
+  for (const title of result.titles) {
+    const normalized = normalizeTitle(title);
+    if (seenTitles.has(normalized)) {
+      return { ok: false, error: "Monthly titles must be unique" };
+    }
+    seenTitles.add(normalized);
+  }
+
+  const forbidden = new Set(
+    forbiddenTitles
+      .filter((title) => typeof title === "string" && title.trim().length > 0)
+      .map(normalizeTitle),
+  );
+
+  for (const title of result.titles) {
+    if (forbidden.has(normalizeTitle(title))) {
+      return {
+        ok: false,
+        error: "Monthly titles must not repeat titles from the previous month",
+      };
+    }
   }
 
   return { ok: true };

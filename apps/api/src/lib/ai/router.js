@@ -30,14 +30,23 @@ async function runWithFallback(taskName, input) {
     try {
       attempts += 1;
       if (taskName === "monthly") {
+        const forbiddenTitles = Array.isArray(input.previousTitles) ? input.previousTitles : [];
         let result = await provider.generateMonthlyTitles(input);
-        let guard = validateMonthlyResult(result, input.selectedDays?.length);
+        let guard = validateMonthlyResult(
+          result,
+          input.selectedDays?.length,
+          forbiddenTitles,
+        );
         if (!guard.ok && provider.generateMonthlyTitlesRetry) {
           result = await provider.generateMonthlyTitlesRetry(
             input,
             buildRetryPrompt(taskName, input),
           );
-          guard = validateMonthlyResult(result, input.selectedDays?.length);
+          guard = validateMonthlyResult(
+            result,
+            input.selectedDays?.length,
+            forbiddenTitles,
+          );
         }
         if (!guard.ok) {
           throw new Error(guard.error);

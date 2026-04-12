@@ -53,12 +53,11 @@ export function getNextMonthStart(baseDate = new Date()) {
   return new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 1);
 }
 
-export function buildSchedulePreview(
+export function buildSchedulePreviewForMonth(
   monthlyCount: number,
   distribution: ScheduleDistribution,
-  baseDate = new Date(),
+  monthStart: Date,
 ): SchedulePreview {
-  const monthStart = getNextMonthStart(baseDate);
   const eligibleDates = getEligibleDates(monthStart, distribution);
   const highlightedDates = eligibleDates.slice(0, Math.max(0, monthlyCount));
   const highlightedKeys = new Set(highlightedDates.map(createIsoDateKey));
@@ -70,6 +69,18 @@ export function buildSchedulePreview(
     highlightedDates,
     eligibleDates,
   };
+}
+
+export function buildSchedulePreview(
+  monthlyCount: number,
+  distribution: ScheduleDistribution,
+  baseDate = new Date(),
+): SchedulePreview {
+  return buildSchedulePreviewForMonth(
+    monthlyCount,
+    distribution,
+    getNextMonthStart(baseDate),
+  );
 }
 
 export function sanitizeMonthlyCount(value: number) {
@@ -188,4 +199,33 @@ function createIsoDateKey(date: Date) {
 
 export function toIsoDateKey(date: Date) {
   return createIsoDateKey(date);
+}
+
+export function inferScheduleDistributionFromDates(
+  dates: Date[],
+): ScheduleDistribution | null {
+  if (dates.length === 0) {
+    return null;
+  }
+
+  const monthStart = new Date(dates[0].getFullYear(), dates[0].getMonth(), 1);
+  const expectedKeys = dates.map(createIsoDateKey).join("|");
+  const distributions: ScheduleDistribution[] = [
+    "mon-wed-fri",
+    "tue-thu-sat",
+    "even-dates",
+    "odd-dates",
+    "daily",
+  ];
+
+  for (const distribution of distributions) {
+    const preview = buildSchedulePreviewForMonth(dates.length, distribution, monthStart);
+    const previewKeys = preview.highlightedDates.map(createIsoDateKey).join("|");
+
+    if (previewKeys === expectedKeys) {
+      return distribution;
+    }
+  }
+
+  return null;
 }

@@ -1,7 +1,27 @@
 const defaultApiBaseUrl = "http://localhost:4000";
 
 export function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_BASE_URL || defaultApiBaseUrl;
+  const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+
+  if (configuredApiBaseUrl) {
+    return configuredApiBaseUrl.replace(/\/+$/, "");
+  }
+
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const isLocalBrowser =
+      hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
+
+    if (isLocalBrowser) {
+      return defaultApiBaseUrl;
+    }
+  } else if (process.env.NODE_ENV !== "production") {
+    return defaultApiBaseUrl;
+  }
+
+  throw new Error(
+    "NEXT_PUBLIC_API_BASE_URL is not set for this deployment. Set it in Vercel to your deployed API URL instead of using http://localhost:4000.",
+  );
 }
 
 async function readJsonSafely(response: Response) {
@@ -18,10 +38,11 @@ export async function generatePreview(input: {
   tone: string;
   language: string;
 }) {
+  const apiBaseUrl = getApiBaseUrl();
   let response: Response;
 
   try {
-    response = await fetch(`${getApiBaseUrl()}/generate/preview`, {
+    response = await fetch(`${apiBaseUrl}/generate/preview`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -30,7 +51,7 @@ export async function generatePreview(input: {
     });
   } catch {
     throw new Error(
-      `Unable to reach the API at ${getApiBaseUrl()}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
+      `Unable to reach the API at ${apiBaseUrl}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
     );
   }
 
@@ -65,11 +86,13 @@ export async function generateMonthlyCalendar(input: {
   platform: string;
   tone: string;
   language: string;
+  previousTitles?: string[];
 }) {
+  const apiBaseUrl = getApiBaseUrl();
   let response: Response;
 
   try {
-    response = await fetch(`${getApiBaseUrl()}/generate/monthly`, {
+    response = await fetch(`${apiBaseUrl}/generate/monthly`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -78,7 +101,7 @@ export async function generateMonthlyCalendar(input: {
     });
   } catch {
     throw new Error(
-      `Unable to reach the API at ${getApiBaseUrl()}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
+      `Unable to reach the API at ${apiBaseUrl}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
     );
   }
 
@@ -113,12 +136,13 @@ export async function generateMonthlyCalendar(input: {
 }
 
 export async function getCalendarsByUser(userId: string) {
+  const apiBaseUrl = getApiBaseUrl();
   let response: Response;
 
   try {
-    response = await fetch(`${getApiBaseUrl()}/calendars?userId=${userId}`);
+    response = await fetch(`${apiBaseUrl}/calendars?userId=${userId}`);
   } catch {
-    throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
+    throw new Error(`Unable to reach the API at ${apiBaseUrl}.`);
   }
 
   const payload = await readJsonSafely(response);
@@ -146,12 +170,13 @@ export async function getCalendarsByUser(userId: string) {
 }
 
 export async function getCalendarById(id: string) {
+  const apiBaseUrl = getApiBaseUrl();
   let response: Response;
 
   try {
-    response = await fetch(`${getApiBaseUrl()}/calendars?id=${id}`);
+    response = await fetch(`${apiBaseUrl}/calendars?id=${id}`);
   } catch {
-    throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
+    throw new Error(`Unable to reach the API at ${apiBaseUrl}.`);
   }
 
   const payload = await readJsonSafely(response);
@@ -184,10 +209,11 @@ export async function generatePostDetails(input: {
   title?: string;
   topic?: string;
 }) {
+  const apiBaseUrl = getApiBaseUrl();
   let response: Response;
 
   try {
-    response = await fetch(`${getApiBaseUrl()}/generate/post`, {
+    response = await fetch(`${apiBaseUrl}/generate/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -196,7 +222,7 @@ export async function generatePostDetails(input: {
     });
   } catch {
     throw new Error(
-      `Unable to reach the API at ${getApiBaseUrl()}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
+      `Unable to reach the API at ${apiBaseUrl}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
     );
   }
 
@@ -230,12 +256,13 @@ export async function generatePostDetails(input: {
 }
 
 export async function listPostsByCalendar(calendarId: string) {
+  const apiBaseUrl = getApiBaseUrl();
   let response: Response;
 
   try {
-    response = await fetch(`${getApiBaseUrl()}/posts?calendarId=${calendarId}`);
+    response = await fetch(`${apiBaseUrl}/posts?calendarId=${calendarId}`);
   } catch {
-    throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
+    throw new Error(`Unable to reach the API at ${apiBaseUrl}.`);
   }
 
   const payload = await readJsonSafely(response);

@@ -99,6 +99,10 @@ function getPlatformPostGuide(platform) {
 }
 
 function buildMonthlyPrompt(input) {
+  const previousTitles = Array.isArray(input.previousTitles)
+    ? input.previousTitles.filter((title) => typeof title === "string" && title.trim().length > 0)
+    : [];
+
   return [
     "You are generating a monthly content calendar for a creator.",
     "Return JSON only with this shape:",
@@ -108,7 +112,20 @@ function buildMonthlyPrompt(input) {
     `Niche: ${input.niche || "general"}`,
     `Month: ${input.month} ${input.year}`,
     `Selected days: ${input.selectedDays.join(", ")}`,
-  ].join("\n");
+    "Every title must be unique within this response.",
+    "Do not reuse, paraphrase, or lightly remix an earlier title.",
+    previousTitles.length > 0
+      ? "Continue the creator's content flow from the previous month with fresh next-step ideas."
+      : "Create a cohesive monthly flow with strong variety.",
+    previousTitles.length > 0
+      ? `Previous month titles to continue from without repeating: ${previousTitles.join(" | ")}`
+      : null,
+    previousTitles.length > 0
+      ? "The new titles must feel like the next chapter, not a copy of the previous month."
+      : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function buildPostPrompt(input) {

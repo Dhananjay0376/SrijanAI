@@ -25,10 +25,28 @@ export function UniverseLoadingScreen() {
 
   return (
     <main className="universe-loading-shell" aria-live="polite">
-      <div className="universe-loading-orb" aria-hidden="true">
-        <span className="universe-loading-ring universe-loading-ring-one" />
-        <span className="universe-loading-ring universe-loading-ring-two" />
-        <span className="universe-loading-core" />
+      <div className="universe-loading-scene" aria-hidden="true">
+        {Array.from({ length: 14 }).map((_, starIndex) => (
+          <span
+            key={`falling-${starIndex}`}
+            className={`universe-falling-star universe-falling-star-${(starIndex % 7) + 1}`}
+          />
+        ))}
+        {Array.from({ length: 10 }).map((_, sparkIndex) => (
+          <span
+            key={`spark-${sparkIndex}`}
+            className={`universe-static-star universe-static-star-${(sparkIndex % 5) + 1}`}
+          />
+        ))}
+        <div className="universe-loading-orb">
+          <span className="universe-loading-ring universe-loading-ring-one" />
+          <span className="universe-loading-ring universe-loading-ring-two" />
+          <span className="universe-loading-ring universe-loading-ring-three" />
+          <span className="universe-loading-core" />
+          <span className="universe-orbit-dot universe-orbit-dot-one" />
+          <span className="universe-orbit-dot universe-orbit-dot-two" />
+          <span className="universe-orbit-dot universe-orbit-dot-three" />
+        </div>
       </div>
 
       <div className="universe-loading-copy">
