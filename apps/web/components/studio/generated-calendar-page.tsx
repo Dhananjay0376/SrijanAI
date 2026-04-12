@@ -231,6 +231,11 @@ export function GeneratedCalendarPage({
   if (!data) {
     return (
       <main className="studio-shell">
+        <div className="cosmic-comets" aria-hidden="true">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <div key={index} className={`comet comet-${index + 1}`} />
+          ))}
+        </div>
         <section className="studio-hero">
           <div>
             <p className="studio-kicker">AI content lab</p>
@@ -256,6 +261,11 @@ export function GeneratedCalendarPage({
 
   return (
     <main className="studio-shell">
+      <div className="cosmic-comets" aria-hidden="true">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <div key={index} className={`comet comet-${index + 1}`} />
+        ))}
+      </div>
       <section className="studio-hero">
         <div>
           <p className="studio-kicker">AI content lab</p>

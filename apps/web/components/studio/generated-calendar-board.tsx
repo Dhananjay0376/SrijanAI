@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Loader2, Sparkles, X } from "lucide-react";
+import { GlassCard } from "../ui/GlassCard";
 import { type ScheduleGenerationState } from "../../lib/schedule";
 
 type PostStatus = "pending" | "confirmed" | "declined";
@@ -101,7 +102,8 @@ export function GeneratedCalendarBoard({
         </p>
       ) : null}
 
-      <div className="generated-calendar-grid" role="grid" aria-label={data.monthLabel}>
+      <GlassCard className="generated-calendar-container">
+        <div className="generated-calendar-grid" role="grid" aria-label={data.monthLabel}>
         {WEEKDAYS.map((day) => (
           <div key={day} className="generated-calendar-weekday">
             {day}
@@ -122,6 +124,7 @@ export function GeneratedCalendarBoard({
                 selectedDay === cell.isoKey ? "is-selected" : ""
               }`}
               role="gridcell"
+              onClick={() => cell.isCurrentMonth && onSelectDay(cell.isoKey)}
             >
               {cell.isCurrentMonth ? (
                 <>
@@ -142,7 +145,10 @@ export function GeneratedCalendarBoard({
                           className={`generated-action-button is-confirm ${
                             status === "confirmed" ? "is-active" : ""
                           }`}
-                          onClick={() => onSetStatus(cell.isoKey, "confirmed")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSetStatus(cell.isoKey, "confirmed");
+                          }}
                         >
                           <Check size={13} />
                         </button>
@@ -151,14 +157,20 @@ export function GeneratedCalendarBoard({
                           className={`generated-action-button is-decline ${
                             status === "declined" ? "is-active" : ""
                           }`}
-                          onClick={() => onSetStatus(cell.isoKey, "declined")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSetStatus(cell.isoKey, "declined");
+                          }}
                         >
                           <X size={13} />
                         </button>
                         <button
                           type="button"
                           className="generated-action-button is-generate"
-                          onClick={() => onGeneratePost(cell.isoKey)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onGeneratePost(cell.isoKey);
+                          }}
                         >
                           {isLoading ? <Loader2 className="studio-spin" size={13} /> : <Sparkles size={13} />}
                           {generatedPosts[cell.isoKey] ? "Regen" : "Gen"}
@@ -168,7 +180,10 @@ export function GeneratedCalendarBoard({
                           className={`generated-action-button is-view ${
                             selectedDay === cell.isoKey ? "is-active" : ""
                           }`}
-                          onClick={() => onSelectDay(cell.isoKey)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectDay(cell.isoKey);
+                          }}
                         >
                           View
                         </button>
@@ -180,7 +195,8 @@ export function GeneratedCalendarBoard({
             </div>
           );
         })}
-      </div>
+        </div>
+      </GlassCard>
 
       {selectedDay ? (
         (() => {
@@ -192,7 +208,7 @@ export function GeneratedCalendarBoard({
           }
 
           return (
-            <div className="generated-post-panel generated-post-panel-expanded">
+            <GlassCard className="generated-post-panel generated-post-panel-expanded">
               <div className="generated-post-panel-header">
                 <div>
                   <p className="section-label">Selected Day</p>
@@ -200,38 +216,61 @@ export function GeneratedCalendarBoard({
                     Day {selectedEntry.dayNumber}: {selectedEntry.title}
                   </strong>
                 </div>
-                <small className={`generated-status-chip is-${statuses[selectedDay] ?? "pending"}`}>
-                  {statuses[selectedDay] ?? "pending"}
-                </small>
+                <div className="generated-panel-top-actions">
+                  <small className={`generated-status-chip is-${statuses[selectedDay] ?? "pending"}`}>
+                    {statuses[selectedDay] ?? "pending"}
+                  </small>
+                  <button 
+                    className="generated-panel-close" 
+                    onClick={() => onSelectDay("")}
+                    aria-label="Close panel"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
 
               {fullPost ? (
-                <>
-                  <p>{fullPost.hook}</p>
-                  <p>{fullPost.caption}</p>
-                  <div className="generated-post-tag-row">
-                    {fullPost.hashtags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
+                <div className="generated-post-body">
+                  <div className="post-detail-section">
+                    <p className="detail-label">Hook</p>
+                    <p className="detail-text">{fullPost.hook}</p>
                   </div>
-                  <p className="generated-post-cta">CTA: {fullPost.cta}</p>
-                  <div className="generated-post-tip-row">
-                    {fullPost.platformTips.map((tip) => (
-                      <span key={tip}>{tip}</span>
-                    ))}
+                  <div className="post-detail-section">
+                    <p className="detail-label">Caption</p>
+                    <p className="detail-text">{fullPost.caption}</p>
+                  </div>
+                  <div className="post-detail-section">
+                    <p className="detail-label">Hashtags</p>
+                    <div className="generated-post-tag-row">
+                      {fullPost.hashtags.map((tag) => (
+                        <span key={tag} className="post-tag">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="post-detail-section">
+                    <p className="detail-label">CTA & Tips</p>
+                    <p className="generated-post-cta">CTA: {fullPost.cta}</p>
+                    <div className="generated-post-tip-row">
+                      {fullPost.platformTips.map((tip) => (
+                        <span key={tip} className="post-tip">{tip}</span>
+                      ))}
+                    </div>
                   </div>
                   {fullPost.metaSummary ? (
                     <p className="schedule-meta-note">{fullPost.metaSummary}</p>
                   ) : null}
-                </>
+                </div>
               ) : (
-                <p>
-                  This day has a generated title, but the full post is still empty. Use the
-                  `Gen` button on the card to create the hook, caption, hashtags, CTA, and
-                  platform tips.
-                </p>
+                <div className="generated-post-empty">
+                  <p>
+                    This day has a generated title, but the full post is still empty. Use the
+                    `Gen` button on the card to create the hook, caption, hashtags, CTA, and
+                    platform tips.
+                  </p>
+                </div>
               )}
-            </div>
+            </GlassCard>
           );
         })()
       ) : null}
