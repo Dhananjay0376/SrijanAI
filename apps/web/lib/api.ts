@@ -38,3 +38,37 @@ export async function generatePreview(input: {
     };
   };
 }
+
+export async function generateMonthlyCalendar(input: {
+  profileId: string;
+  month: string;
+  year: number;
+  selectedDays: number[];
+  niche: string;
+  platform: string;
+  tone: string;
+  language: string;
+}) {
+  const response = await fetch(`${getApiBaseUrl()}/generate/monthly`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Monthly calendar generation failed");
+  }
+
+  return payload as {
+    titles: string[];
+    meta?: {
+      provider?: string;
+      attempts?: number;
+      durationMs?: number;
+    };
+  };
+}
