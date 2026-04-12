@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo, useEffect } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial, Icosahedron, Octahedron, Float, MeshDistortMaterial, Grid } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -193,6 +193,23 @@ function CameraRig() {
 }
 
 export function AnimatedBackground() {
+  const [supportsWebgl, setSupportsWebgl] = useState(false);
+
+  useEffect(() => {
+    const canvas = document.createElement("canvas");
+
+    try {
+      const context =
+        canvas.getContext("webgl2", { antialias: false }) ||
+        canvas.getContext("webgl", { antialias: false }) ||
+        canvas.getContext("experimental-webgl", { antialias: false });
+
+      setSupportsWebgl(Boolean(context));
+    } catch {
+      setSupportsWebgl(false);
+    }
+  }, []);
+
   return (
     <div
       className="pointer-events-none bg-[#051110]"
@@ -205,17 +222,33 @@ export function AnimatedBackground() {
         zIndex: -1,
       }}
     >
-      <Canvas camera={{ position: [0, 0, 3.5], fov: 65 }}>
-        <fog attach="fog" args={["#051110", 3, 15]} />
-        <CameraRig />
-        <CyberGrid />
-        <ParticleSwarm />
-        <FloatingShapes />
-        
-        <EffectComposer>
-          <Bloom luminanceThreshold={0.4} mipmapBlur intensity={1.5} radius={0.8} />
-        </EffectComposer>
-      </Canvas>
+      {supportsWebgl ? (
+        <Canvas camera={{ position: [0, 0, 3.5], fov: 65 }}>
+          <fog attach="fog" args={["#051110", 3, 15]} />
+          <CameraRig />
+          <CyberGrid />
+          <ParticleSwarm />
+          <FloatingShapes />
+          
+          <EffectComposer>
+            <Bloom luminanceThreshold={0.4} mipmapBlur intensity={1.5} radius={0.8} />
+          </EffectComposer>
+        </Canvas>
+      ) : (
+        <div
+          aria-hidden="true"
+          style={{
+            width: "100%",
+            height: "100%",
+            background: [
+              "radial-gradient(circle at 20% 20%, rgba(41, 184, 176, 0.24), transparent 28%)",
+              "radial-gradient(circle at 80% 30%, rgba(2, 156, 193, 0.2), transparent 24%)",
+              "radial-gradient(circle at 50% 80%, rgba(18, 84, 79, 0.35), transparent 32%)",
+              "linear-gradient(180deg, #051110 0%, #07201e 45%, #051110 100%)",
+            ].join(", "),
+          }}
+        />
+      )}
     </div>
   );
 }
