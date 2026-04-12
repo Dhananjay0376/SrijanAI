@@ -149,9 +149,13 @@ export function CreatePlanSchedule() {
         JSON.stringify(generatedState),
       );
       setMetaSummary(
-        result.meta?.provider
-          ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
-          : "AI titles generated for this month.",
+        result.warning
+          ? result.meta?.provider
+            ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}. ${result.warning}`
+            : result.warning
+          : result.meta?.provider
+            ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
+            : "AI titles generated for this month.",
       );
       setGeneratedTitlesByDate(nextTitlesByDate);
       

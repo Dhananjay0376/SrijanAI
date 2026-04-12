@@ -206,9 +206,13 @@ export function GeneratedCalendarPage({
           hashtags: result.post.hashtags,
           cta: result.post.cta,
           platformTips: result.post.platformTips,
-          metaSummary: result.meta?.provider
-            ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
-            : undefined,
+          metaSummary: result.warning
+            ? result.meta?.provider
+              ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}. ${result.warning}`
+              : result.warning
+            : result.meta?.provider
+              ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
+              : undefined,
         },
       }));
       setStatuses((current) => ({

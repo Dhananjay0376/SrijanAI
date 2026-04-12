@@ -1,6 +1,7 @@
 require("dotenv").config({ path: [".env.local", ".env"] });
 
 const http = require("node:http");
+const dotenv = require("dotenv");
 const { dbHealthHandler, healthHandler } = require("./modules/health");
 const {
   createProfile,
@@ -288,29 +289,47 @@ const server = http.createServer(async (req, res) => {
         try {
           const result = await generateMonthlyTitles(input);
           let calendar = null;
+          let warning = null;
 
           if (input.calendarId) {
-            calendar = await updateCalendarTitles(input.calendarId, result.titles);
-            if (!calendar) {
-              sendError(res, 404, "Calendar not found");
-              return;
+            try {
+              calendar = await updateCalendarTitles(input.calendarId, result.titles);
+              if (!calendar) {
+                sendError(res, 404, "Calendar not found");
+                return;
+              }
+            } catch (error) {
+              if (isDatabaseUnavailable(error)) {
+                warning = "Calendar generated, but it could not be saved because the database is unavailable.";
+              } else {
+                throw error;
+              }
             }
           } else if (input.userId) {
-            const created = await createCalendar({
-              userId: input.userId,
-              month: input.month,
-              year: input.year,
-              selectedDays: input.selectedDays,
-            });
-            calendar = await updateCalendarTitles(created.id, result.titles);
+            try {
+              const created = await createCalendar({
+                userId: input.userId,
+                month: input.month,
+                year: input.year,
+                selectedDays: input.selectedDays,
+              });
+              calendar = await updateCalendarTitles(created.id, result.titles);
+            } catch (error) {
+              if (isDatabaseUnavailable(error)) {
+                warning = "Calendar generated, but it could not be saved because the database is unavailable.";
+              } else {
+                throw error;
+              }
+            }
           }
 
           logEvent("generation.monthly", {
             provider: result.meta?.provider,
             attempts: result.meta?.attempts,
             durationMs: result.meta?.durationMs,
+            persisted: Boolean(calendar),
           });
-          const responsePayload = { ...result, calendar };
+          const responsePayload = { ...result, calendar, warning };
           const responseErrors = validateMonthlyResponse(responsePayload);
           if (responseErrors.length > 0) {
             sendError(res, 500, "Response schema violation", responseErrors);
@@ -341,24 +360,69 @@ const server = http.createServer(async (req, res) => {
         }
         try {
           const result = await generatePost(input);
-          const stored = await createPost({
-            calendarId: input.calendarId,
-            day: input.day,
-            platform: input.platform,
-            tone: input.tone,
-            title: result.title,
-            hook: result.hook,
-            caption: result.caption,
-            hashtags: result.hashtags,
-            cta: result.cta,
-            platformTips: result.platformTips,
-          });
+          const isPreviewCalendar = String(input.calendarId || "").startsWith("preview-");
+          let stored;
+          let warning = null;
+
+          if (isPreviewCalendar) {
+            const now = new Date().toISOString();
+            stored = {
+              id: `preview-${Date.now()}`,
+              calendarId: input.calendarId,
+              day: input.day,
+              title: result.title,
+              hook: result.hook,
+              caption: result.caption,
+              hashtags: result.hashtags,
+              cta: result.cta,
+              platformTips: result.platformTips,
+              createdAt: now,
+              updatedAt: now,
+            };
+            warning = "Post generated in preview mode and was not saved.";
+          } else {
+            try {
+              stored = await createPost({
+                calendarId: input.calendarId,
+                day: input.day,
+                platform: input.platform,
+                tone: input.tone,
+                title: result.title,
+                hook: result.hook,
+                caption: result.caption,
+                hashtags: result.hashtags,
+                cta: result.cta,
+                platformTips: result.platformTips,
+              });
+            } catch (error) {
+              if (isDatabaseUnavailable(error)) {
+                const now = new Date().toISOString();
+                stored = {
+                  id: `generated-${Date.now()}`,
+                  calendarId: input.calendarId,
+                  day: input.day,
+                  title: result.title,
+                  hook: result.hook,
+                  caption: result.caption,
+                  hashtags: result.hashtags,
+                  cta: result.cta,
+                  platformTips: result.platformTips,
+                  createdAt: now,
+                  updatedAt: now,
+                };
+                warning = "Post generated, but it could not be saved because the database is unavailable.";
+              } else {
+                throw error;
+              }
+            }
+          }
           logEvent("generation.post", {
             provider: result.meta?.provider,
             attempts: result.meta?.attempts,
             durationMs: result.meta?.durationMs,
+            persisted: !warning,
           });
-          const responsePayload = { post: stored, meta: result.meta };
+          const responsePayload = { post: stored, meta: result.meta, warning };
           const responseErrors = validatePostResponse(responsePayload);
           if (responseErrors.length > 0) {
             sendError(res, 500, "Response schema violation", responseErrors);
@@ -396,7 +460,7 @@ const server = http.createServer(async (req, res) => {
             platform: input.platform,
             title: input.topic,
             topic: input.topic,
-            tone: input.tone,
+            tone: input.topic,
           });
 
           sendJson(res, 200, {

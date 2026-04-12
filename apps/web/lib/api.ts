@@ -103,6 +103,7 @@ export async function generateMonthlyCalendar(input: {
         postId: string | null;
       }>;
     };
+    warning?: string | null;
     meta?: {
       provider?: string;
       attempts?: number;
@@ -219,6 +220,7 @@ export async function generatePostDetails(input: {
       createdAt: string;
       updatedAt: string;
     };
+    warning?: string | null;
     meta?: {
       provider?: string;
       attempts?: number;
