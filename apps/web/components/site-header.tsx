@@ -1,9 +1,12 @@
+"use client";
+
 import {
   Show,
   UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
 import { hasClerkPublishableKey } from "../lib/auth";
+import { motion } from "framer-motion";
 
 const navigationItems = [
   { href: "/", label: "Home" },
@@ -14,10 +17,20 @@ const navigationItems = [
 
 export function SiteHeader() {
   return (
-    <div className="site-header-wrap">
+    <motion.div 
+      className="site-header-wrap"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
       <header className="site-header">
         <Link className="brand-mark" href="/">
-          <div className="brand-icon">S</div>
+          <motion.div 
+            className="brand-icon"
+            whileHover={{ scale: 1.1, rotate: 5, boxShadow: "0 0 15px rgba(2, 156, 193, 0.5)" }}
+          >
+            S
+          </motion.div>
           <div className="brand-text">
             <span className="brand-kicker">SrijanAI</span>
             <span className="brand-subtitle">Creator workflow engine</span>
@@ -25,14 +38,26 @@ export function SiteHeader() {
         </Link>
 
         <nav className="site-nav" aria-label="Primary">
-          {navigationItems.map((item) => (
+          {navigationItems.map((item, i) => (
             <Link key={item.href} href={item.href}>
-              {item.label}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + i * 0.1, duration: 0.5 }}
+                whileHover={{ scale: 1.05, color: "#029cc1", textShadow: "0 0 8px rgba(2, 156, 193, 0.5)" }}
+              >
+                {item.label}
+              </motion.div>
             </Link>
           ))}
         </nav>
 
-        <div className="site-actions">
+        <motion.div 
+          className="site-actions"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
           {hasClerkPublishableKey ? (
             <>
               <Show when="signed-out">
@@ -59,8 +84,8 @@ export function SiteHeader() {
               </Link>
             </>
           )}
-        </div>
+        </motion.div>
       </header>
-    </div>
+    </motion.div>
   );
 }
