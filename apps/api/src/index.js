@@ -23,6 +23,7 @@ const { generateMonthlyTitles, generatePost } = require("./lib/ai/router");
 const {
   validateCreatorProfile,
   validateCalendar,
+  validatePreviewGeneration,
   validatePost,
   validateMonthlyGeneration,
   validatePostGeneration,
@@ -271,6 +272,49 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         sendError(res, 500, "Failed to generate post", error.message);
+      });
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/generate/preview") {
+    parseJsonBody(req)
+      .then(async (input) => {
+        const errors = validatePreviewGeneration(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid preview generation input", errors);
+          return;
+        }
+
+        try {
+          const result = await generatePost({
+            calendarId: "preview",
+            day: new Date().toISOString().slice(0, 10),
+            language: input.language,
+            platform: input.platform,
+            title: input.topic,
+            topic: input.topic,
+            tone: input.tone,
+          });
+
+          sendJson(res, 200, {
+            title: result.title,
+            hook: result.hook,
+            caption: result.caption,
+            hashtags: result.hashtags,
+            cta: result.cta,
+            platformTips: result.platformTips,
+            meta: result.meta,
+          });
+        } catch (error) {
+          sendError(res, 502, "Preview generation failed", error.message);
+        }
+      })
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
+          sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to generate preview", error.message);
       });
     return;
   }
