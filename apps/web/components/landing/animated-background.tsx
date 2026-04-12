@@ -212,7 +212,7 @@ export function AnimatedBackground() {
         <ParticleSwarm />
         <FloatingShapes />
         
-        <EffectComposer disableNormalPass>
+        <EffectComposer>
           <Bloom luminanceThreshold={0.4} mipmapBlur intensity={1.5} radius={0.8} />
         </EffectComposer>
       </Canvas>
