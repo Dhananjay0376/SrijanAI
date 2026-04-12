@@ -177,7 +177,7 @@ export function ContentStudio() {
         </div>
       </section>
 
-      <div className="content-anchor" ref={studioMainRef as any} />
+      <div className="content-anchor" ref={workbenchRef as any} />
 
       <section className="studio-hero">
         <div>
