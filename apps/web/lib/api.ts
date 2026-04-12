@@ -103,6 +103,7 @@ export async function generateMonthlyCalendar(input: {
         postId: string | null;
       }>;
     };
+    warning?: string | null;
     meta?: {
       provider?: string;
       attempts?: number;
@@ -208,7 +209,8 @@ export async function generatePostDetails(input: {
   return payload as {
     post: {
       id: string;
-      calendarDay: string;
+      calendarId: string;
+      day: string;
       title: string;
       hook: string;
       caption: string;
@@ -218,10 +220,44 @@ export async function generatePostDetails(input: {
       createdAt: string;
       updatedAt: string;
     };
+    warning?: string | null;
     meta?: {
       provider?: string;
       attempts?: number;
       durationMs?: number;
     };
   };
+}
+
+export async function listPostsByCalendar(calendarId: string) {
+  let response: Response;
+
+  try {
+    response = await fetch(`${getApiBaseUrl()}/posts?calendarId=${calendarId}`);
+  } catch {
+    throw new Error(`Unable to reach the API at ${getApiBaseUrl()}.`);
+  }
+
+  const payload = await readJsonSafely(response);
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Failed to fetch posts");
+  }
+
+  return payload as Array<{
+    id: string;
+    calendarId: string;
+    day: string;
+    platform: string;
+    tone: string;
+    title: string;
+    hook: string;
+    caption: string;
+    hashtags: string[];
+    cta: string;
+    platformTips: string[];
+    videoTips: string[];
+    createdAt: string;
+    updatedAt: string;
+  }>;
 }

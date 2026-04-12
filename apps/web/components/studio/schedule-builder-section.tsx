@@ -30,6 +30,7 @@ type ScheduleBuilderSectionProps = {
   preview: SchedulePreview;
   generatedTitlesByDate?: Record<string, string>;
   isGenerating?: boolean;
+  canGenerate?: boolean;
   hasGenerated?: boolean;
   errorMessage?: string;
   metaSummary?: string;
@@ -48,6 +49,7 @@ export function ScheduleBuilderSection({
   preview,
   generatedTitlesByDate = {},
   isGenerating = false,
+  canGenerate = true,
   hasGenerated = false,
   errorMessage = "",
   metaSummary,
@@ -160,11 +162,22 @@ export function ScheduleBuilderSection({
             {errorMessage}
           </p>
         ) : null}
-        <NeonButton as="button" className="studio-generate-button" onClick={onGenerateCalendar} type="button">
+        <NeonButton
+          as="button"
+          className="studio-generate-button"
+          disabled={!canGenerate || isGenerating}
+          onClick={onGenerateCalendar}
+          type="button"
+        >
           {isGenerating ? (
             <>
               <Loader2 className="studio-spin" size={18} />
               Generating
+            </>
+          ) : !canGenerate ? (
+            <>
+              Sign in to Generate
+              <CalendarDays size={18} />
             </>
           ) : (
             <>

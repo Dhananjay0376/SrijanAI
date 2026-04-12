@@ -4,8 +4,11 @@ import { ArrowRight } from "lucide-react";
 import { NeonButton } from "../ui/NeonButton";
 import { AnimatedBackground } from "./animated-background";
 import { motion } from "framer-motion";
+import { useAuth } from "@clerk/nextjs";
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth();
+
   return (
     <main className="landing-shell">
       <AnimatedBackground />
@@ -53,7 +56,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
           >
-            <NeonButton href="/sign-up">
+            <NeonButton href={isSignedIn ? "/dashboard" : "/sign-up"}>
               Start for Free <ArrowRight size={18} />
             </NeonButton>
           </motion.div>

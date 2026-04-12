@@ -161,7 +161,7 @@ export function GeneratedCalendarBoard({
                           onClick={() => onGeneratePost(cell.isoKey)}
                         >
                           {isLoading ? <Loader2 className="studio-spin" size={13} /> : <Sparkles size={13} />}
-                          Gen
+                          {generatedPosts[cell.isoKey] ? "Regen" : "Gen"}
                         </button>
                         <button
                           type="button"

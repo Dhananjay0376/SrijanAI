@@ -256,27 +256,52 @@ async function updateCalendarTitles(calendarId, titles) {
 async function createPost(input) {
   return db.transaction(async (tx) => {
     const now = new Date();
-    const postId = randomUUID();
+    const [existingPost] = await tx
+      .select()
+      .from(schema.posts)
+      .where(
+        and(
+          eq(schema.posts.calendarId, input.calendarId),
+          eq(schema.posts.day, input.day),
+        ),
+      )
+      .limit(1);
 
-    const [post] = await tx
-      .insert(schema.posts)
-      .values({
-        id: postId,
-        calendarId: input.calendarId,
-        day: input.day,
-        platform: input.platform,
-        tone: input.tone,
-        title: input.title || "Untitled post",
-        hook: input.hook || "",
-        caption: input.caption || "",
-        hashtags: Array.isArray(input.hashtags) ? input.hashtags : [],
-        cta: input.cta || "",
-        platformTips: Array.isArray(input.platformTips) ? input.platformTips : [],
-        videoTips: Array.isArray(input.videoTips) ? input.videoTips : [],
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    const postId = existingPost?.id || randomUUID();
+
+    const nextValues = {
+      calendarId: input.calendarId,
+      day: input.day,
+      platform: input.platform,
+      tone: input.tone,
+      title: input.title || "Untitled post",
+      hook: input.hook || "",
+      caption: input.caption || "",
+      hashtags: Array.isArray(input.hashtags) ? input.hashtags : [],
+      cta: input.cta || "",
+      platformTips: Array.isArray(input.platformTips) ? input.platformTips : [],
+      videoTips: Array.isArray(input.videoTips) ? input.videoTips : [],
+      updatedAt: now,
+    };
+
+    let post;
+
+    if (existingPost) {
+      [post] = await tx
+        .update(schema.posts)
+        .set(nextValues)
+        .where(eq(schema.posts.id, existingPost.id))
+        .returning();
+    } else {
+      [post] = await tx
+        .insert(schema.posts)
+        .values({
+          id: postId,
+          ...nextValues,
+          createdAt: now,
+        })
+        .returning();
+    }
 
     await tx
       .update(schema.calendarDays)

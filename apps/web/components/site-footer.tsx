@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const productLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -20,76 +23,116 @@ const socialLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="site-footer">
+    <motion.footer 
+      className="site-footer"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
       <div className="footer-inner">
         <div className="footer-grid">
-          <div className="footer-brand-col">
+          <motion.div 
+            className="footer-brand-col"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
             <p className="footer-title">SrijanAI</p>
             <p className="footer-copy">
               Building a faster, calmer content workflow for creators who want
               structure without losing their voice.
             </p>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             <p className="footer-col-title">Product</p>
             <div className="footer-col-links">
               {productLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
-                  {link.label}
+                  <motion.span whileHover={{ color: "#029cc1", x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                    {link.label}
+                  </motion.span>
                 </Link>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             <p className="footer-col-title">Company</p>
             <div className="footer-col-links">
               {companyLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
-                  {link.label}
+                  <motion.span whileHover={{ color: "#029cc1", x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
+                    {link.label}
+                  </motion.span>
                 </Link>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
             <p className="footer-col-title">Connect</p>
             <div className="footer-col-links">
               {socialLinks.map((link) => (
-                <a
+                <motion.a
                   key={link.title}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  whileHover={{ color: "#029cc1", x: 5 }} 
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   {link.title}
-                </a>
+                </motion.a>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        <div className="footer-bottom">
+        <motion.div 
+          className="footer-bottom"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
           <span className="footer-legal">
             © {new Date().getFullYear()} SrijanAI. All rights reserved.
           </span>
           <div className="footer-socials">
             {socialLinks.map((link) => (
-              <a
+              <motion.a
                 key={link.label}
                 href={link.href}
                 className="footer-social-link"
                 target="_blank"
                 rel="noopener noreferrer"
                 title={link.title}
+                whileHover={{ scale: 1.2, color: "#029cc1", filter: "drop-shadow(0 0 8px rgba(2, 156, 193, 0.6))" }}
               >
                 {link.label}
-              </a>
+              </motion.a>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

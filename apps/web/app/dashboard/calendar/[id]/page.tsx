@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
-import { getCalendarById } from "../../../../lib/api";
+import { getCalendarById, listPostsByCalendar } from "../../../../lib/api";
 import { hasClerkEnv } from "../../../../lib/auth";
 import { GeneratedCalendarPage } from "../../../../components/studio/generated-calendar-page";
 
@@ -29,7 +29,9 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
       return notFound();
     }
 
-    return <GeneratedCalendarPage initialData={calendar} />;
+    const posts = await listPostsByCalendar(id);
+
+    return <GeneratedCalendarPage initialData={calendar} initialPosts={posts} />;
   } catch (error) {
     console.error("Error fetching calendar:", error);
     return notFound();

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "../ui/GlassCard";
-import { generatePostDetails } from "../../lib/api";
+import { generatePostDetails, listPostsByCalendar } from "../../lib/api";
 import { type ScheduleGenerationState } from "../../lib/schedule";
 import { GeneratedCalendarBoard } from "./generated-calendar-board";
 
@@ -22,8 +22,20 @@ type GeneratedPostDetailsState = {
 
 export function GeneratedCalendarPage({
   initialData,
+  initialPosts = [],
 }: {
   initialData?: any;
+  initialPosts?: Array<{
+    id: string;
+    calendarId: string;
+    day: string;
+    title: string;
+    hook: string;
+    caption: string;
+    hashtags: string[];
+    cta: string;
+    platformTips: string[];
+  }>;
 }) {
   const router = useRouter();
   const [data, setData] = useState<ScheduleGenerationState | null>(null);
@@ -34,6 +46,23 @@ export function GeneratedCalendarPage({
   const [generatedPosts, setGeneratedPosts] = useState<Record<string, GeneratedPostDetailsState>>(
     {},
   );
+
+  const mapGeneratedPost = (post: {
+    day: string;
+    title: string;
+    hook: string;
+    caption: string;
+    hashtags: string[];
+    cta: string;
+    platformTips: string[];
+  }) => ({
+    title: post.title,
+    hook: post.hook,
+    caption: post.caption,
+    hashtags: post.hashtags,
+    cta: post.cta,
+    platformTips: post.platformTips,
+  });
 
   useEffect(() => {
     if (initialData) {
@@ -62,6 +91,12 @@ export function GeneratedCalendarPage({
           return accumulator;
         }, {}),
       );
+      setGeneratedPosts(
+        initialPosts.reduce<Record<string, GeneratedPostDetailsState>>((accumulator, post) => {
+          accumulator[post.day] = mapGeneratedPost(post);
+          return accumulator;
+        }, {}),
+      );
       setSelectedDay(initialData.days?.[0]?.date ?? null);
       return;
     }
@@ -87,6 +122,47 @@ export function GeneratedCalendarPage({
     }
   }, []);
 
+  useEffect(() => {
+    if (!initialData?.id) {
+      return;
+    }
+
+    if (initialPosts.length > 0) {
+      return;
+    }
+
+    let isActive = true;
+
+    listPostsByCalendar(initialData.id)
+      .then((posts) => {
+        if (!isActive) {
+          return;
+        }
+
+        setGeneratedPosts(
+          posts.reduce<Record<string, GeneratedPostDetailsState>>((accumulator, post) => {
+            accumulator[post.day] = mapGeneratedPost(post);
+            return accumulator;
+          }, {}),
+        );
+      })
+      .catch((error) => {
+        if (!isActive) {
+          return;
+        }
+
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to load previously generated posts for this calendar.",
+        );
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [initialData?.id, initialPosts]);
+
   const calendarDayMap = useMemo(() => {
     if (!data) {
       return new Map<string, { isoKey: string; title: string }>();
@@ -106,6 +182,7 @@ export function GeneratedCalendarPage({
       return;
     }
 
+    setSelectedDay(isoKey);
     setLoadingPostDay(isoKey);
     setErrorMessage("");
 
@@ -129,10 +206,18 @@ export function GeneratedCalendarPage({
           hashtags: result.post.hashtags,
           cta: result.post.cta,
           platformTips: result.post.platformTips,
-          metaSummary: result.meta?.provider
-            ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
-            : undefined,
+          metaSummary: result.warning
+            ? result.meta?.provider
+              ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}. ${result.warning}`
+              : result.warning
+            : result.meta?.provider
+              ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}.`
+              : undefined,
         },
+      }));
+      setStatuses((current) => ({
+        ...current,
+        [isoKey]: current[isoKey] === "declined" ? "declined" : "confirmed",
       }));
     } catch (error) {
       setErrorMessage(

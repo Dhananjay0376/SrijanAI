@@ -149,10 +149,11 @@ ul, ol { list-style: none; padding: 0; }
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  background: rgba(5, 13, 26, 0.7);
-  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  background: rgba(5, 17, 16, 0.6); /* Matching the #051110 tealish void */
+  border-bottom: 1px solid rgba(2, 156, 193, 0.25);
+  box-shadow: 0 4px 30px rgba(2, 156, 193, 0.1);
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -960,9 +961,9 @@ ul, ol { list-style: none; padding: 0; }
 /* ── FOOTER - COSMIC THEME ── */
 .site-footer {
   margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(5, 8, 15, 0.4);
-  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(2, 156, 193, 0.15);
+  background: rgba(5, 17, 16, 0.6);
+  backdrop-filter: blur(24px);
   position: relative;
   z-index: 10;
   overflow: hidden;
@@ -976,7 +977,7 @@ ul, ol { list-style: none; padding: 0; }
   transform: translateX(-50%);
   width: 100%;
   height: 60px;
-  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.35) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(2, 156, 193, 0.35) 0%, transparent 70%);
   filter: blur(20px);
   pointer-events: none;
 }
@@ -989,10 +990,10 @@ ul, ol { list-style: none; padding: 0; }
   transform: translateX(-50%);
   width: 90%;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #00f0ff 15%, #b582ff 85%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #029cc1 15%, #29b8b0 85%, transparent 100%);
   box-shadow: 
-    0 -2px 15px rgba(0, 240, 255, 0.8),
-    0 -5px 30px rgba(181, 130, 255, 0.6);
+    0 -2px 15px rgba(2, 156, 193, 0.8),
+    0 -5px 30px rgba(41, 184, 176, 0.6);
   z-index: 1;
 }
 
