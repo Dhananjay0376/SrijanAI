@@ -19,7 +19,13 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  const calendars = await getCalendarsByUser(userId);
+  let calendars: Awaited<ReturnType<typeof getCalendarsByUser>> = [];
+
+  try {
+    calendars = await getCalendarsByUser(userId);
+  } catch {
+    calendars = [];
+  }
   
   return <DashboardHome firstName={user?.firstName} initialCalendars={calendars} />;
 }
