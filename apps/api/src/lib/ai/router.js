@@ -53,13 +53,13 @@ async function runWithFallback(taskName, input) {
       }
       if (taskName === "post") {
         let result = await provider.generatePost(input);
-        let guard = validatePostResult(result);
+        let guard = validatePostResult(result, input.platform);
         if (!guard.ok && provider.generatePostRetry) {
           result = await provider.generatePostRetry(
             input,
             buildRetryPrompt(taskName, input),
           );
-          guard = validatePostResult(result);
+          guard = validatePostResult(result, input.platform);
         }
         if (!guard.ok) {
           throw new Error(guard.error);
