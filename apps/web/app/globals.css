@@ -133,6 +133,91 @@ ul, ol { list-style: none; padding: 0; }
   z-index: 1;
 }
 
+.universe-loading-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(2, 156, 193, 0.16), transparent 30%),
+    radial-gradient(circle at 78% 22%, rgba(41, 184, 176, 0.18), transparent 24%),
+    radial-gradient(circle at 52% 82%, rgba(15, 71, 67, 0.32), transparent 34%),
+    linear-gradient(180deg, #051110 0%, #07201e 50%, #051110 100%);
+  text-align: center;
+}
+
+.universe-loading-orb {
+  position: relative;
+  width: 118px;
+  height: 118px;
+}
+
+.universe-loading-ring,
+.universe-loading-core {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+}
+
+.universe-loading-ring {
+  border: 1px solid rgba(144, 246, 255, 0.2);
+}
+
+.universe-loading-ring-one {
+  animation: universe-spin 2.5s linear infinite;
+}
+
+.universe-loading-ring-two {
+  inset: 12px;
+  border-color: rgba(41, 184, 176, 0.28);
+  animation: universe-spin-reverse 1.8s linear infinite;
+}
+
+.universe-loading-core {
+  inset: 31px;
+  background: radial-gradient(circle, rgba(41, 184, 176, 0.95), rgba(2, 156, 193, 0.3));
+  box-shadow:
+    0 0 24px rgba(2, 156, 193, 0.35),
+    0 0 46px rgba(41, 184, 176, 0.2);
+}
+
+.universe-loading-copy {
+  max-width: 560px;
+}
+
+.universe-loading-copy h1 {
+  margin-top: 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.universe-loading-line {
+  min-height: 1.8em;
+  margin-top: 0.85rem;
+  color: var(--text-dim);
+  font-size: clamp(0.98rem, 1.8vw, 1.08rem);
+  transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+  animation: universe-copy-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes universe-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes universe-spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes universe-copy-pulse {
+  0% { opacity: 0.45; transform: translateY(6px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0.45; transform: translateY(-6px); }
+}
+
 .snow-overlay-canvas {
   position: fixed;
   inset: 0;
