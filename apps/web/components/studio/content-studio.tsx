@@ -141,7 +141,6 @@ export function ContentStudio() {
               <Sparkles size={24} />
             </div>
             <h2>No plans yet</h2>
-            <p>Create your first AI content plan to get started</p>
             <button className="create-plan-button" onClick={handleScrollToContent}>
               + Create First Plan
             </button>
