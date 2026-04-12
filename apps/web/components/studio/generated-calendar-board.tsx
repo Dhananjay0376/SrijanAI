@@ -25,7 +25,7 @@ type GeneratedCalendarBoardProps = {
   selectedDay: string | null;
   onSetStatus: (isoKey: string, status: PostStatus) => void;
   onGeneratePost: (isoKey: string) => void;
-  onSelectDay: (isoKey: string) => void;
+  onSelectDay: (isoKey: string | null) => void;
 };
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -208,69 +208,79 @@ export function GeneratedCalendarBoard({
           }
 
           return (
-            <GlassCard className="generated-post-panel generated-post-panel-expanded">
-              <div className="generated-post-panel-header">
-                <div>
-                  <p className="section-label">Selected Day</p>
-                  <strong>
-                    Day {selectedEntry.dayNumber}: {selectedEntry.title}
-                  </strong>
-                </div>
-                <div className="generated-panel-top-actions">
-                  <small className={`generated-status-chip is-${statuses[selectedDay] ?? "pending"}`}>
-                    {statuses[selectedDay] ?? "pending"}
-                  </small>
-                  <button 
-                    className="generated-panel-close" 
-                    onClick={() => onSelectDay("")}
-                    aria-label="Close panel"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
+            <div className="generated-post-modal" role="dialog" aria-modal="true" aria-labelledby="generated-post-title">
+              <button
+                type="button"
+                className="generated-post-modal-backdrop"
+                aria-label="Close generated post popup"
+                onClick={() => onSelectDay(null)}
+              />
+              <div className="generated-post-modal-card">
+                <GlassCard className="generated-post-panel generated-post-panel-expanded">
+                  <div className="generated-post-panel-header">
+                    <div>
+                      <p className="section-label">Selected Day</p>
+                      <strong id="generated-post-title">
+                        Day {selectedEntry.dayNumber}: {selectedEntry.title}
+                      </strong>
+                    </div>
+                    <div className="generated-post-modal-actions">
+                      <small className={`generated-status-chip is-${statuses[selectedDay] ?? "pending"}`}>
+                        {statuses[selectedDay] ?? "pending"}
+                      </small>
+                      <button
+                        type="button"
+                        className="generated-action-button is-view"
+                        onClick={() => onSelectDay(null)}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
 
-              {fullPost ? (
-                <div className="generated-post-body">
-                  <div className="post-detail-section">
-                    <p className="detail-label">Hook</p>
-                    <p className="detail-text">{fullPost.hook}</p>
-                  </div>
-                  <div className="post-detail-section">
-                    <p className="detail-label">Caption</p>
-                    <p className="detail-text">{fullPost.caption}</p>
-                  </div>
-                  <div className="post-detail-section">
-                    <p className="detail-label">Hashtags</p>
-                    <div className="generated-post-tag-row">
-                      {fullPost.hashtags.map((tag) => (
-                        <span key={tag} className="post-tag">{tag}</span>
-                      ))}
+                  {fullPost ? (
+                    <div className="generated-post-body">
+                      <div className="post-detail-section">
+                        <p className="detail-label">Hook</p>
+                        <p className="detail-text">{fullPost.hook}</p>
+                      </div>
+                      <div className="post-detail-section">
+                        <p className="detail-label">Caption</p>
+                        <p className="detail-text">{fullPost.caption}</p>
+                      </div>
+                      <div className="post-detail-section">
+                        <p className="detail-label">Hashtags</p>
+                        <div className="generated-post-tag-row">
+                          {fullPost.hashtags.map((tag) => (
+                            <span key={tag} className="post-tag">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="post-detail-section">
+                        <p className="detail-label">CTA & Tips</p>
+                        <p className="generated-post-cta">CTA: {fullPost.cta}</p>
+                        <div className="generated-post-tip-row">
+                          {fullPost.platformTips.map((tip) => (
+                            <span key={tip} className="post-tip">{tip}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {fullPost.metaSummary ? (
+                        <p className="schedule-meta-note">{fullPost.metaSummary}</p>
+                      ) : null}
                     </div>
-                  </div>
-                  <div className="post-detail-section">
-                    <p className="detail-label">CTA & Tips</p>
-                    <p className="generated-post-cta">CTA: {fullPost.cta}</p>
-                    <div className="generated-post-tip-row">
-                      {fullPost.platformTips.map((tip) => (
-                        <span key={tip} className="post-tip">{tip}</span>
-                      ))}
+                  ) : (
+                    <div className="generated-post-empty">
+                      <p>
+                        This day has a generated title, but the full post is still empty. Use the
+                        `Gen` button on the card to create the hook, caption, hashtags, CTA, and
+                        platform tips.
+                      </p>
                     </div>
-                  </div>
-                  {fullPost.metaSummary ? (
-                    <p className="schedule-meta-note">{fullPost.metaSummary}</p>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="generated-post-empty">
-                  <p>
-                    This day has a generated title, but the full post is still empty. Use the
-                    `Gen` button on the card to create the hook, caption, hashtags, CTA, and
-                    platform tips.
-                  </p>
-                </div>
-              )}
-            </GlassCard>
+                  )}
+                </GlassCard>
+              </div>
+            </div>
           );
         })()
       ) : null}

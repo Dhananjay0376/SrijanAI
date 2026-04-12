@@ -3853,6 +3853,38 @@ code {
   margin-top: 0.2rem;
 }
 
+.generated-post-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.generated-post-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(3, 8, 16, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.generated-post-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+}
+
+.generated-post-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
 .generated-post-panel-header {
   display: flex;
   align-items: flex-start;
@@ -4030,6 +4062,19 @@ code {
 
   .generated-calendar-topbar {
     flex-direction: column;
+  }
+
+  .generated-post-modal {
+    padding: 0.8rem;
+  }
+
+  .generated-post-panel-header {
+    flex-direction: column;
+  }
+
+  .generated-post-modal-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .generated-calendar-grid {
