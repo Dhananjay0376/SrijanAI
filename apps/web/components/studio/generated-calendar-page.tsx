@@ -30,6 +30,36 @@ function getCalendarContextStorageKey(calendarId: string) {
   return `srijanai.calendar-context:${calendarId}`;
 }
 
+function normalizeIsoDate(dateValue: string, year?: number, month?: string) {
+  if (typeof dateValue !== "string") {
+    return "";
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return dateValue;
+  }
+
+  const monthNameMatch = dateValue.match(/^(\d{4})-([A-Za-z]+)-(\d{2})$/);
+  if (monthNameMatch) {
+    const parsed = new Date(`${monthNameMatch[2]} 1, ${monthNameMatch[1]}`);
+    if (!Number.isNaN(parsed.getTime())) {
+      return `${monthNameMatch[1]}-${`${parsed.getMonth() + 1}`.padStart(2, "0")}-${monthNameMatch[3]}`;
+    }
+  }
+
+  const trailingDayMatch = dateValue.match(/(\d{1,2})$/);
+  if (!trailingDayMatch || !year || !month) {
+    return dateValue;
+  }
+
+  const parsedMonth = new Date(`${month} 1, ${year}`);
+  if (Number.isNaN(parsedMonth.getTime())) {
+    return dateValue;
+  }
+
+  return `${year}-${`${parsedMonth.getMonth() + 1}`.padStart(2, "0")}-${trailingDayMatch[1].padStart(2, "0")}`;
+}
+
 export function GeneratedCalendarPage({
   initialData,
   initialPosts = [],
@@ -89,6 +119,27 @@ export function GeneratedCalendarPage({
           parsedContext = null;
         }
       }
+      const contextDates = new Map(
+        (parsedContext?.dates || []).map((entry) => [entry.isoKey, entry]),
+      );
+      const initialDates = (initialData.days || []).map((day: any) => {
+        const isoKey = normalizeIsoDate(day.date, initialData.year, initialData.month);
+        const fallbackContextEntry = contextDates.get(isoKey);
+
+        return {
+          isoKey,
+          dayNumber: parseInt(isoKey.split("-")[2] || "0", 10),
+          title: day.title || fallbackContextEntry?.title || "Untitled post",
+        };
+      });
+      const mergedDates =
+        initialDates.length > 0
+          ? initialDates
+          : (parsedContext?.dates || []).map((entry) => ({
+              isoKey: normalizeIsoDate(entry.isoKey, initialData.year, initialData.month),
+              dayNumber: entry.dayNumber,
+              title: entry.title || "Untitled post",
+            }));
       const mappedData: ScheduleGenerationState = {
         platform: parsedContext?.platform || initialData.platform || "Instagram",
         niche: parsedContext?.niche || initialData.niche || "Exam Tips",
@@ -98,19 +149,16 @@ export function GeneratedCalendarPage({
         month: initialData.month,
         year: initialData.year,
         distribution: parsedContext?.distribution || "mon-wed-fri",
-        requestedMonthlyCount: parsedContext?.requestedMonthlyCount || initialData.days?.length || 0,
+        requestedMonthlyCount: parsedContext?.requestedMonthlyCount || mergedDates.length || 0,
         generatedAt: parsedContext?.generatedAt || initialData.createdAt || new Date().toISOString(),
-        dates: (initialData.days || []).map((day: any) => ({
-          isoKey: day.date,
-          dayNumber: parseInt(day.date.split("-")[2], 10),
-          title: day.title || "Untitled post",
-        })),
+        dates: mergedDates,
       };
       
       setData(mappedData);
       setStatuses(
         (initialData.days || []).reduce((accumulator: Record<string, PostStatus>, day: any) => {
-          accumulator[day.date] = day.status === "generated" ? "confirmed" : "pending";
+          const isoKey = normalizeIsoDate(day.date, initialData.year, initialData.month);
+          accumulator[isoKey] = day.status === "generated" ? "confirmed" : "pending";
           return accumulator;
         }, {}),
       );
@@ -120,7 +168,7 @@ export function GeneratedCalendarPage({
           return accumulator;
         }, {}),
       );
-      setSelectedDay(initialData.days?.[0]?.date ?? null);
+      setSelectedDay(null);
       return;
     }
 
@@ -139,7 +187,7 @@ export function GeneratedCalendarPage({
           return accumulator;
         }, {}),
       );
-      setSelectedDay(parsed.dates[0]?.isoKey ?? null);
+      setSelectedDay(null);
     } catch {
       setErrorMessage("Unable to load the generated calendar from this session.");
     }
