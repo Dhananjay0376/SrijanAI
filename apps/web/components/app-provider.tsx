@@ -1,15 +1,10 @@
 import { ClerkProvider } from "@clerk/nextjs";
-import { hasClerkEnv } from "../lib/auth";
 
 type AppProviderProps = Readonly<{
   children: React.ReactNode;
 }>;
 
 export function AppProvider({ children }: AppProviderProps) {
-  if (!hasClerkEnv) {
-    return children;
-  }
-
   return (
     <ClerkProvider
       appearance={{
