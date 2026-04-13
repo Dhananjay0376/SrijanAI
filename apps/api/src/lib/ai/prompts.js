@@ -1,11 +1,21 @@
-function getCaptionLengthGuide(platform) {
+function isHinglishLanguage(language) {
+  const normalized = String(language || "").toLowerCase();
+  return normalized.includes("hinglish") || normalized.includes("hindi + english");
+}
+
+function getCaptionLengthGuide(platform, language) {
   const normalized = String(platform || "").toLowerCase();
+  const isHinglish = isHinglishLanguage(language);
 
   if (normalized.includes("youtube")) {
     return {
       label: "short-form YouTube caption",
       instruction:
-        "Keep the caption concise: target 80 to 180 characters, 1 to 2 short lines, optimized for a YouTube Short description.",
+        isHinglish
+          ? "Write a fuller Hinglish YouTube Short description: target 180 to 320 characters, 2 to 4 short lines, with a stronger setup, payoff, and CTA."
+          : "Write a fuller YouTube Short description: target 150 to 280 characters, 2 to 4 short lines, with a clear setup, payoff, and CTA.",
+      min: isHinglish ? 180 : 150,
+      max: isHinglish ? 320 : 280,
     };
   }
 
@@ -13,7 +23,11 @@ function getCaptionLengthGuide(platform) {
     return {
       label: "X caption",
       instruction:
-        "Keep the caption punchy: target 140 to 240 characters, a single compact thought, no long paragraphs.",
+        isHinglish
+          ? "Keep the X caption sharp but meaningfully longer: target 220 to 300 characters, 2 compact lines, with strong opinion, tension, or payoff."
+          : "Keep the X caption sharp but slightly fuller: target 180 to 280 characters, 1 to 3 compact lines, with strong opinion, tension, or payoff.",
+      min: isHinglish ? 220 : 180,
+      max: isHinglish ? 300 : 280,
     };
   }
 
@@ -21,14 +35,22 @@ function getCaptionLengthGuide(platform) {
     return {
       label: "LinkedIn caption",
       instruction:
-        "Keep the caption professional and valuable: target 500 to 1200 characters, broken into short readable paragraphs.",
+        isHinglish
+          ? "Write a substantial Hinglish LinkedIn caption: target 900 to 1800 characters, broken into short readable paragraphs with a clear insight arc, example, and takeaway."
+          : "Write a substantial LinkedIn caption: target 700 to 1600 characters, broken into short readable paragraphs with a clear insight arc, example, and takeaway.",
+      min: isHinglish ? 900 : 700,
+      max: isHinglish ? 1800 : 1600,
     };
   }
 
   return {
     label: "Instagram caption",
     instruction:
-      "Keep the caption engaging but readable: target 300 to 900 characters, with a strong opening line and short supporting lines.",
+      isHinglish
+        ? "Write a longer Hinglish Instagram caption: target 650 to 1500 characters, with a strong hook, emotional or educational depth, short readable lines, and a meaningful closing CTA."
+        : "Write a longer Instagram caption: target 500 to 1300 characters, with a strong hook, emotional or educational depth, short readable lines, and a meaningful closing CTA.",
+    min: isHinglish ? 650 : 500,
+    max: isHinglish ? 1500 : 1300,
   };
 }
 
@@ -129,8 +151,9 @@ function buildMonthlyPrompt(input) {
 }
 
 function buildPostPrompt(input) {
-  const captionGuide = getCaptionLengthGuide(input.platform);
+  const captionGuide = getCaptionLengthGuide(input.platform, input.language);
   const platformGuide = getPlatformPostGuide(input.platform);
+  const isHinglish = isHinglishLanguage(input.language);
 
   return [
     "You are generating a full social post.",
@@ -140,6 +163,7 @@ function buildPostPrompt(input) {
     `Tone: ${input.tone}`,
     `Language: ${input.language || "English"}`,
     `Caption format goal: ${captionGuide.label}`,
+    `Caption length target: ${captionGuide.min} to ${captionGuide.max} characters.`,
     captionGuide.instruction,
     `Hook rule: ${platformGuide.hookInstruction}`,
     `Caption rule: ${platformGuide.captionInstruction}`,
@@ -147,15 +171,42 @@ function buildPostPrompt(input) {
     `CTA rule: ${platformGuide.ctaInstruction}`,
     `Platform tips rule: ${platformGuide.tipsInstruction}`,
     "Make every field feel native to the selected platform instead of generic social media copy.",
+    isHinglish
+      ? "For Hinglish, write naturally in a Hindi-English blend using Roman script. Do not collapse into mostly English. Keep the phrasing conversational, culturally natural, and meaningfully detailed."
+      : "Write in the requested language naturally and avoid generic filler phrasing.",
+    "Do not make the caption feel underwritten. Expand with concrete insight, emotional payoff, examples, or actionable detail while staying platform-native.",
     `Day: ${input.day}`,
     `Title: ${input.title || input.topic || "Generate a title"}`,
     `Topic: ${input.topic || input.title || "General creator content"}`,
   ].join("\n");
 }
 
+function buildPostRetryPrompt(input, validationError) {
+  const captionGuide = getCaptionLengthGuide(input.platform, input.language);
+  const isHinglish = isHinglishLanguage(input.language);
+
+  return [
+    "Your previous response did not satisfy the post requirements.",
+    validationError ? `Problem to fix: ${validationError}` : null,
+    "Regenerate the entire JSON response.",
+    `The caption must land between ${captionGuide.min} and ${captionGuide.max} characters.`,
+    "The caption must be substantially more developed than before, not a minor expansion.",
+    "Add concrete detail, stronger setup, richer explanation, and a better closing payoff while staying native to the platform.",
+    isHinglish
+      ? "For Hinglish, keep the caption naturally bilingual in Roman script and make it feel full-length, expressive, and detailed."
+      : "Do not return a short caption. Favor a fuller, more complete version.",
+    "Return ONLY valid JSON with this exact shape:",
+    '{ "title": "...", "hook": "...", "caption": "...", "hashtags": ["#"], "cta": "...", "platformTips": ["..."] }',
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 module.exports = {
   buildMonthlyPrompt,
   buildPostPrompt,
+  buildPostRetryPrompt,
   getCaptionLengthGuide,
   getPlatformPostGuide,
+  isHinglishLanguage,
 };

@@ -5,20 +5,18 @@ const {
   validateMonthlyResult,
   validatePostResult,
 } = require("./guardrails");
+const { buildPostRetryPrompt } = require("./prompts");
 
 const providers = [groq, gemini, openrouter];
 
-function buildRetryPrompt(taskName, input) {
+function buildRetryPrompt(taskName, input, validationError) {
   if (taskName === "monthly") {
     return (
       "Return ONLY valid JSON with this shape:\n" +
       '{ "titles": ["title1", "title2"] }'
     );
   }
-  return (
-    "Return ONLY valid JSON with this shape:\n" +
-    '{ "title": "...", "hook": "...", "caption": "...", "hashtags": ["#"], "cta": "...", "platformTips": ["..."] }'
-  );
+  return buildPostRetryPrompt(input, validationError);
 }
 
 async function runWithFallback(taskName, input) {
@@ -62,13 +60,13 @@ async function runWithFallback(taskName, input) {
       }
       if (taskName === "post") {
         let result = await provider.generatePost(input);
-        let guard = validatePostResult(result, input.platform);
+        let guard = validatePostResult(result, input.platform, input.language);
         if (!guard.ok && provider.generatePostRetry) {
           result = await provider.generatePostRetry(
             input,
-            buildRetryPrompt(taskName, input),
+            buildRetryPrompt(taskName, input, guard.error),
           );
-          guard = validatePostResult(result, input.platform);
+          guard = validatePostResult(result, input.platform, input.language);
         }
         if (!guard.ok) {
           throw new Error(guard.error);

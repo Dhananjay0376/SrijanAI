@@ -1,19 +1,13 @@
-function getCaptionLengthRule(platform) {
-  const normalized = String(platform || "").toLowerCase();
+const { getCaptionLengthGuide } = require("./prompts");
 
-  if (normalized.includes("youtube")) {
-    return { min: 80, max: 180, label: "YouTube" };
-  }
+function getCaptionLengthRule(platform, language) {
+  const guide = getCaptionLengthGuide(platform, language);
 
-  if (normalized.includes("twitter") || normalized.includes("x / twitter") || normalized === "x") {
-    return { min: 140, max: 240, label: "X" };
-  }
-
-  if (normalized.includes("linkedin")) {
-    return { min: 500, max: 1200, label: "LinkedIn" };
-  }
-
-  return { min: 300, max: 900, label: "Instagram" };
+  return {
+    min: guide.min,
+    max: guide.max,
+    label: guide.label,
+  };
 }
 
 function getPlatformPostRule(platform) {
@@ -93,7 +87,7 @@ function validateMonthlyResult(result, expectedCount, forbiddenTitles = []) {
   return { ok: true };
 }
 
-function validatePostResult(result, platform) {
+function validatePostResult(result, platform, language) {
   if (!result || typeof result !== "object") {
     return { ok: false, error: "Post result must be an object" };
   }
@@ -142,7 +136,7 @@ function validatePostResult(result, platform) {
   }
 
   const captionLength = result.caption.trim().length;
-  const rule = getCaptionLengthRule(platform);
+  const rule = getCaptionLengthRule(platform, language);
   if (captionLength < rule.min || captionLength > rule.max) {
     return {
       ok: false,
