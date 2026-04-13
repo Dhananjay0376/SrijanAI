@@ -1,5 +1,5 @@
 const { randomUUID } = require("node:crypto");
-const { and, asc, eq, inArray } = require("drizzle-orm");
+const { and, asc, eq, inArray, or } = require("drizzle-orm");
 const { db, schema } = require("./client");
 
 function toIsoString(value) {
@@ -58,6 +58,84 @@ function mapPost(row) {
   };
 }
 
+function getMonthNumber(month) {
+  if (typeof month === "number" && Number.isInteger(month)) {
+    return month >= 1 && month <= 12 ? month : null;
+  }
+
+  if (typeof month !== "string") {
+    return null;
+  }
+
+  const trimmed = month.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  const numericMonth = Number(trimmed);
+  if (Number.isInteger(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
+    return numericMonth;
+  }
+
+  const parsedDate = new Date(`${trimmed} 1, 2000`);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate.getMonth() + 1;
+}
+
+function buildIsoDate(year, month, day) {
+  const monthNumber = getMonthNumber(month);
+
+  if (!Number.isInteger(year) || !monthNumber || !Number.isInteger(day)) {
+    return null;
+  }
+
+  return `${year}-${String(monthNumber).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function buildLegacyCalendarDate(year, month, day) {
+  if (!Number.isInteger(year) || !month || !Number.isInteger(day)) {
+    return null;
+  }
+
+  return `${year}-${String(month)}-${String(day).padStart(2, "0")}`;
+}
+
+function normalizeCalendarDayDate(dateValue, calendarRow) {
+  if (typeof dateValue !== "string") {
+    return dateValue;
+  }
+
+  const isoMatch = dateValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    return dateValue;
+  }
+
+  const monthNameMatch = dateValue.match(/^(\d{4})-([A-Za-z]+)-(\d{2})$/);
+  if (monthNameMatch) {
+    const [, yearText, monthText, dayText] = monthNameMatch;
+    const normalized = buildIsoDate(Number(yearText), monthText, Number(dayText));
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  const trailingDayMatch = dateValue.match(/(\d{1,2})$/);
+  if (!trailingDayMatch) {
+    return dateValue;
+  }
+
+  const normalized = buildIsoDate(
+    calendarRow?.year,
+    calendarRow?.month,
+    Number(trailingDayMatch[1]),
+  );
+
+  return normalized || dateValue;
+}
+
 function mapCalendar(calendarRow, dayRows = []) {
   if (!calendarRow) {
     return null;
@@ -70,7 +148,7 @@ function mapCalendar(calendarRow, dayRows = []) {
     year: calendarRow.year,
     days: dayRows.map((day) => ({
       id: day.id,
-      date: day.date,
+      date: normalizeCalendarDayDate(day.date, calendarRow),
       status: day.status,
       title: day.title,
       postId: day.postId,
@@ -153,7 +231,9 @@ async function createCalendar(input) {
     const dayRows = input.selectedDays.map((day) => ({
       id: randomUUID(),
       calendarId,
-      date: `${input.year}-${String(input.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+      date:
+        buildIsoDate(input.year, input.month, day) ||
+        buildLegacyCalendarDate(input.year, input.month, day),
       status: "planned",
       title: null,
       postId: null,
@@ -256,6 +336,16 @@ async function updateCalendarTitles(calendarId, titles) {
 async function createPost(input) {
   return db.transaction(async (tx) => {
     const now = new Date();
+    const [calendar] = await tx
+      .select()
+      .from(schema.calendars)
+      .where(eq(schema.calendars.id, input.calendarId))
+      .limit(1);
+    const legacyCalendarDay = buildLegacyCalendarDate(
+      calendar?.year,
+      calendar?.month,
+      Number(String(input.day).slice(-2)),
+    );
     const [existingPost] = await tx
       .select()
       .from(schema.posts)
@@ -313,7 +403,10 @@ async function createPost(input) {
       .where(
         and(
           eq(schema.calendarDays.calendarId, input.calendarId),
-          eq(schema.calendarDays.date, input.day),
+          or(
+            eq(schema.calendarDays.date, input.day),
+            ...(legacyCalendarDay ? [eq(schema.calendarDays.date, legacyCalendarDay)] : []),
+          ),
         ),
       );
 
