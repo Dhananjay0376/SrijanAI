@@ -5,9 +5,11 @@ import { NeonButton } from "../ui/NeonButton";
 import { AnimatedBackground } from "./animated-background";
 import { motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
+import { hasClerkPublishableKey } from "../../lib/auth";
 
 export default function LandingPage() {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn: clerkIsSignedIn } = useAuth();
+  const isSignedIn = hasClerkPublishableKey ? clerkIsSignedIn : false;
 
   return (
     <main className="landing-shell">
