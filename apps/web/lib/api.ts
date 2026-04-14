@@ -1,4 +1,5 @@
 const defaultApiBaseUrl = "http://localhost:4000";
+const productionApiFallbackUrl = "https://api-production-b573.up.railway.app";
 
 export function getApiBaseUrl() {
   const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
@@ -8,7 +9,7 @@ export function getApiBaseUrl() {
   }
 
   const isClient = typeof window !== "undefined";
-  
+
   if (isClient) {
     const hostname = window.location.hostname;
     const isLocalBrowser =
@@ -17,18 +18,30 @@ export function getApiBaseUrl() {
     if (isLocalBrowser) {
       return defaultApiBaseUrl;
     }
-    
-    console.error(
-      "[SrijanAI] NEXT_PUBLIC_API_BASE_URL is missing in the browser environment. " +
-      "This variable must be set in your Railway Web service variables AND the service must be redeployed to bake it into the client bundle."
+
+    // NEXT_PUBLIC_* variables are baked in at build time. If the variable was
+    // not available during the build, fall back to the known production API URL
+    // rather than crashing the app entirely.
+    console.warn(
+      "[SrijanAI] NEXT_PUBLIC_API_BASE_URL was not set at build time. " +
+      `Falling back to ${productionApiFallbackUrl}. ` +
+      "To fix this permanently, ensure the variable is set in your Railway Web " +
+      "service variables before deploying."
     );
-  } else if (process.env.NODE_ENV !== "production") {
-    return defaultApiBaseUrl;
+    return productionApiFallbackUrl;
   }
 
-  throw new Error(
-    "API URL (NEXT_PUBLIC_API_BASE_URL) is not configured. Please ensure it is set in your Railway Web service dashboard and redeploy.",
-  );
+  // Server-side (SSR/SSG): use the fallback in production rather than throwing,
+  // since the variable may simply not have been inlined during the build.
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      "[SrijanAI] NEXT_PUBLIC_API_BASE_URL is not set server-side. " +
+      `Falling back to ${productionApiFallbackUrl}.`
+    );
+    return productionApiFallbackUrl;
+  }
+
+  return defaultApiBaseUrl;
 }
 
 async function readJsonSafely(response: Response) {
