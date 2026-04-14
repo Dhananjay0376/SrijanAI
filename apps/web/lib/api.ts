@@ -7,7 +7,9 @@ export function getApiBaseUrl() {
     return configuredApiBaseUrl.replace(/\/+$/, "");
   }
 
-  if (typeof window !== "undefined") {
+  const isClient = typeof window !== "undefined";
+  
+  if (isClient) {
     const hostname = window.location.hostname;
     const isLocalBrowser =
       hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
@@ -15,12 +17,17 @@ export function getApiBaseUrl() {
     if (isLocalBrowser) {
       return defaultApiBaseUrl;
     }
+    
+    console.error(
+      "[SrijanAI] NEXT_PUBLIC_API_BASE_URL is missing in the browser environment. " +
+      "This variable must be set in your Railway Web service variables AND the service must be redeployed to bake it into the client bundle."
+    );
   } else if (process.env.NODE_ENV !== "production") {
     return defaultApiBaseUrl;
   }
 
   throw new Error(
-    "NEXT_PUBLIC_API_BASE_URL is not set for this deployment. Set it in Vercel to your deployed API URL instead of using http://localhost:4000.",
+    "API URL (NEXT_PUBLIC_API_BASE_URL) is not configured. Please ensure it is set in your Railway Web service dashboard and redeploy.",
   );
 }
 
@@ -255,6 +262,56 @@ export async function generatePostDetails(input: {
   };
 }
 
+export async function generateThumbnail(input: {
+  calendarId: string;
+  day: string;
+  platform: string;
+  tone: string;
+  language?: string;
+  title: string;
+  hook?: string;
+  caption?: string;
+  cta?: string;
+  topic?: string;
+}) {
+  const apiBaseUrl = getApiBaseUrl();
+  let response: Response;
+
+  try {
+    response = await fetch(`${apiBaseUrl}/generate/thumbnail`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    throw new Error(
+      `Unable to reach the API at ${apiBaseUrl}. Start the API server and check NEXT_PUBLIC_API_BASE_URL if needed.`,
+    );
+  }
+
+  const payload = await readJsonSafely(response);
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Thumbnail generation failed");
+  }
+
+  return payload as {
+    thumbnail: {
+      prompt?: string;
+      mimeType: string;
+      base64: string;
+    };
+    warning?: string | null;
+    meta?: {
+      provider?: string;
+      attempts?: number;
+      durationMs?: number;
+    };
+  };
+}
+
 export async function listPostsByCalendar(calendarId: string) {
   const apiBaseUrl = getApiBaseUrl();
   let response: Response;
@@ -268,6 +325,10 @@ export async function listPostsByCalendar(calendarId: string) {
   const payload = await readJsonSafely(response);
 
   if (!response.ok) {
+    if (response.status >= 500) {
+      return [];
+    }
+
     throw new Error(payload?.error || "Failed to fetch posts");
   }
 
@@ -284,6 +345,9 @@ export async function listPostsByCalendar(calendarId: string) {
     cta: string;
     platformTips: string[];
     videoTips: string[];
+    thumbnailPrompt: string | null;
+    thumbnailMimeType: string | null;
+    thumbnailBase64: string | null;
     createdAt: string;
     updatedAt: string;
   }>;
