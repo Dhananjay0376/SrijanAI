@@ -25,7 +25,7 @@ function getPlatformPostRule(platform) {
     return { minHashtags: 3, maxHashtags: 5, minTips: 3, maxTips: 3, maxCtaLength: 160 };
   }
 
-  return { minHashtags: 5, maxHashtags: 8, minTips: 3, maxTips: 3, maxCtaLength: 140 };
+  return { minHashtags: 5, maxHashtags: 8, minTips: 3, maxTips: 3, maxCtaLength: 200 };
 }
 
 function normalizeTitle(title) {

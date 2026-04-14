@@ -9,13 +9,13 @@ function getCaptionLengthGuide(platform, language) {
 
   if (normalized.includes("youtube")) {
     return {
-      label: "short-form YouTube caption",
+      label: "detailed YouTube Short script",
       instruction:
         isHinglish
-          ? "Write a fuller Hinglish YouTube Short description: target 180 to 320 characters, 2 to 4 short lines, with a stronger setup, payoff, and CTA."
-          : "Write a fuller YouTube Short description: target 150 to 280 characters, 2 to 4 short lines, with a clear setup, payoff, and CTA.",
-      min: isHinglish ? 180 : 150,
-      max: isHinglish ? 320 : 280,
+          ? "Write a substantial Hinglish YouTube Short script: target 900 to 1600 characters. Structure it with a fast-paced hook, deep technical or educational value, and a high-energy closing CTA. Make it long enough for a 45-60 second video."
+          : "Write a substantial YouTube Short script: target 800 to 1500 characters. Structure it with a fast-paced hook, deep technical or educational value, and a high-energy closing CTA. Make it long enough for a 45-60 second video.",
+      min: isHinglish ? 900 : 800,
+      max: isHinglish ? 1600 : 1500,
     };
   }
 
@@ -44,13 +44,13 @@ function getCaptionLengthGuide(platform, language) {
   }
 
   return {
-    label: "Instagram caption",
+    label: "Instagram script/caption",
     instruction:
       isHinglish
-        ? "Write a longer Hinglish Instagram caption: target 650 to 1500 characters, with a strong hook, emotional or educational depth, short readable lines, and a meaningful closing CTA."
-        : "Write a longer Instagram caption: target 500 to 1300 characters, with a strong hook, emotional or educational depth, short readable lines, and a meaningful closing CTA.",
-    min: isHinglish ? 650 : 500,
-    max: isHinglish ? 1500 : 1300,
+        ? "Write a long-form Hinglish Instagram caption: target 1200 to 2200 characters, broken into readable parts with a powerful hook, expert depth, storytelling, and a strong CTA."
+        : "Write a long-form Instagram caption: target 1000 to 2000 characters, broken into readable parts with a powerful hook, expert depth, storytelling, and a strong CTA.",
+    min: isHinglish ? 1200 : 1000,
+    max: isHinglish ? 2200 : 2000,
   };
 }
 
@@ -171,10 +171,12 @@ function buildPostPrompt(input) {
     `CTA rule: ${platformGuide.ctaInstruction}`,
     `Platform tips rule: ${platformGuide.tipsInstruction}`,
     "Make every field feel native to the selected platform instead of generic social media copy.",
+    `Focus on the ${input.topic || "general"} niche with specific, actionable details. Avoid generic advice. Provide concrete insights that show advanced knowledge of the topic.`,
     isHinglish
       ? "For Hinglish, write naturally in a Hindi-English blend using Roman script. Do not collapse into mostly English. Keep the phrasing conversational, culturally natural, and meaningfully detailed."
       : "Write in the requested language naturally and avoid generic filler phrasing.",
     "Do not make the caption feel underwritten. Expand with concrete insight, emotional payoff, examples, or actionable detail while staying platform-native.",
+    "If it is a video platform (YouTube/Instagram), treat the caption as a full video script with pacing cues if appropriate.",
     `Day: ${input.day}`,
     `Title: ${input.title || input.topic || "Generate a title"}`,
     `Topic: ${input.topic || input.title || "General creator content"}`,
