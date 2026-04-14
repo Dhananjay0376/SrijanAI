@@ -133,6 +133,28 @@ function validatePreviewGeneration(input) {
   return errors;
 }
 
+function validateThumbnailGeneration(input) {
+  const errors = [];
+
+  if (!isNonEmptyString(input.calendarId)) {
+    errors.push("calendarId is required");
+  }
+  if (!isNonEmptyString(input.day)) {
+    errors.push("day is required");
+  }
+  if (!isNonEmptyString(input.platform)) {
+    errors.push("platform is required");
+  }
+  if (!isNonEmptyString(input.tone)) {
+    errors.push("tone is required");
+  }
+  if (!isNonEmptyString(input.title)) {
+    errors.push("title is required");
+  }
+
+  return errors;
+}
+
 module.exports = {
   validateCreatorProfile,
   validateCalendar,
@@ -140,4 +162,5 @@ module.exports = {
   validatePost,
   validateMonthlyGeneration,
   validatePostGeneration,
+  validateThumbnailGeneration,
 };

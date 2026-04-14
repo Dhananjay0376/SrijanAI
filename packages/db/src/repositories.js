@@ -2,6 +2,18 @@ const { randomUUID } = require("node:crypto");
 const { and, asc, eq, inArray, or } = require("drizzle-orm");
 const { db, schema } = require("./client");
 
+function isMissingColumnError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    (message.includes("column") &&
+      (message.includes("does not exist") || message.includes("doesn't exist"))) ||
+    (message.includes("failed query") &&
+      (message.includes("thumbnail_prompt") ||
+        message.includes("thumbnail_mime_type") ||
+        message.includes("thumbnail_base64")))
+  );
+}
+
 function toIsoString(value) {
   if (!value) {
     return null;
@@ -53,6 +65,9 @@ function mapPost(row) {
     cta: row.cta,
     platformTips: row.platformTips || [],
     videoTips: row.videoTips || [],
+    thumbnailPrompt: row.thumbnailPrompt || null,
+    thumbnailMimeType: row.thumbnailMimeType || null,
+    thumbnailBase64: row.thumbnailBase64 || null,
     createdAt: toIsoString(row.createdAt),
     updatedAt: toIsoString(row.updatedAt),
   };
@@ -334,109 +349,229 @@ async function updateCalendarTitles(calendarId, titles) {
 }
 
 async function createPost(input) {
-  return db.transaction(async (tx) => {
-    const now = new Date();
-    const [calendar] = await tx
-      .select()
-      .from(schema.calendars)
-      .where(eq(schema.calendars.id, input.calendarId))
-      .limit(1);
-    const legacyCalendarDay = buildLegacyCalendarDate(
-      calendar?.year,
-      calendar?.month,
-      Number(String(input.day).slice(-2)),
-    );
-    const [existingPost] = await tx
-      .select()
-      .from(schema.posts)
-      .where(
-        and(
-          eq(schema.posts.calendarId, input.calendarId),
-          eq(schema.posts.day, input.day),
-        ),
-      )
-      .limit(1);
-
-    const postId = existingPost?.id || randomUUID();
-
-    const nextValues = {
-      calendarId: input.calendarId,
-      day: input.day,
-      platform: input.platform,
-      tone: input.tone,
-      title: input.title || "Untitled post",
-      hook: input.hook || "",
-      caption: input.caption || "",
-      hashtags: Array.isArray(input.hashtags) ? input.hashtags : [],
-      cta: input.cta || "",
-      platformTips: Array.isArray(input.platformTips) ? input.platformTips : [],
-      videoTips: Array.isArray(input.videoTips) ? input.videoTips : [],
-      updatedAt: now,
-    };
-
-    let post;
-
-    if (existingPost) {
-      [post] = await tx
-        .update(schema.posts)
-        .set(nextValues)
-        .where(eq(schema.posts.id, existingPost.id))
-        .returning();
-    } else {
-      [post] = await tx
-        .insert(schema.posts)
-        .values({
-          id: postId,
-          ...nextValues,
-          createdAt: now,
+  const persistPost = async (includeThumbnailColumns) =>
+    db.transaction(async (tx) => {
+      const now = new Date();
+      const [calendar] = await tx
+        .select()
+        .from(schema.calendars)
+        .where(eq(schema.calendars.id, input.calendarId))
+        .limit(1);
+      const legacyCalendarDay = buildLegacyCalendarDate(
+        calendar?.year,
+        calendar?.month,
+        Number(String(input.day).slice(-2)),
+      );
+      const [existingPost] = await tx
+        .select({
+          id: schema.posts.id,
         })
-        .returning();
+        .from(schema.posts)
+        .where(
+          and(
+            eq(schema.posts.calendarId, input.calendarId),
+            eq(schema.posts.day, input.day),
+          ),
+        )
+        .limit(1);
+
+      const postId = existingPost?.id || randomUUID();
+
+      const nextValues = {
+        calendarId: input.calendarId,
+        day: input.day,
+        platform: input.platform,
+        tone: input.tone,
+        title: input.title || "Untitled post",
+        hook: input.hook || "",
+        caption: input.caption || "",
+        hashtags: Array.isArray(input.hashtags) ? input.hashtags : [],
+        cta: input.cta || "",
+        platformTips: Array.isArray(input.platformTips) ? input.platformTips : [],
+        videoTips: Array.isArray(input.videoTips) ? input.videoTips : [],
+        ...(includeThumbnailColumns
+          ? {
+              thumbnailPrompt: input.thumbnailPrompt || null,
+              thumbnailMimeType: input.thumbnailMimeType || null,
+              thumbnailBase64: input.thumbnailBase64 || null,
+            }
+          : {}),
+        updatedAt: now,
+      };
+
+      let post;
+
+      if (existingPost) {
+        [post] = await tx
+          .update(schema.posts)
+          .set(nextValues)
+          .where(eq(schema.posts.id, existingPost.id))
+          .returning();
+      } else {
+        [post] = await tx
+          .insert(schema.posts)
+          .values({
+            id: postId,
+            ...nextValues,
+            createdAt: now,
+          })
+          .returning();
+      }
+
+      await tx
+        .update(schema.calendarDays)
+        .set({
+          postId,
+          status: "generated",
+          title: input.title || "Untitled post",
+        })
+        .where(
+          and(
+            eq(schema.calendarDays.calendarId, input.calendarId),
+            or(
+              eq(schema.calendarDays.date, input.day),
+              ...(legacyCalendarDay ? [eq(schema.calendarDays.date, legacyCalendarDay)] : []),
+            ),
+          ),
+        );
+
+      await tx
+        .update(schema.calendars)
+        .set({ updatedAt: now })
+        .where(eq(schema.calendars.id, input.calendarId));
+
+      return mapPost(post);
+    });
+
+  try {
+    return await persistPost(true);
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
     }
 
-    await tx
-      .update(schema.calendarDays)
-      .set({
-        postId,
-        status: "generated",
-        title: input.title || "Untitled post",
-      })
-      .where(
-        and(
-          eq(schema.calendarDays.calendarId, input.calendarId),
-          or(
-            eq(schema.calendarDays.date, input.day),
-            ...(legacyCalendarDay ? [eq(schema.calendarDays.date, legacyCalendarDay)] : []),
-          ),
-        ),
-      );
-
-    await tx
-      .update(schema.calendars)
-      .set({ updatedAt: now })
-      .where(eq(schema.calendars.id, input.calendarId));
-
-    return mapPost(post);
-  });
+    return persistPost(false);
+  }
 }
 
 async function getPost(postId) {
-  const [post] = await db
-    .select()
-    .from(schema.posts)
-    .where(eq(schema.posts.id, postId))
-    .limit(1);
+  try {
+    const [post] = await db
+      .select()
+      .from(schema.posts)
+      .where(eq(schema.posts.id, postId))
+      .limit(1);
 
-  return mapPost(post);
+    return mapPost(post);
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+
+    const [post] = await db
+      .select({
+        id: schema.posts.id,
+        calendarId: schema.posts.calendarId,
+        day: schema.posts.day,
+        platform: schema.posts.platform,
+        tone: schema.posts.tone,
+        title: schema.posts.title,
+        hook: schema.posts.hook,
+        caption: schema.posts.caption,
+        hashtags: schema.posts.hashtags,
+        cta: schema.posts.cta,
+        platformTips: schema.posts.platformTips,
+        videoTips: schema.posts.videoTips,
+        createdAt: schema.posts.createdAt,
+        updatedAt: schema.posts.updatedAt,
+      })
+      .from(schema.posts)
+      .where(eq(schema.posts.id, postId))
+      .limit(1);
+
+    return mapPost(post);
+  }
 }
 
 async function listPostsByCalendar(calendarId) {
-  const posts = await db
-    .select()
-    .from(schema.posts)
-    .where(eq(schema.posts.calendarId, calendarId))
-    .orderBy(asc(schema.posts.createdAt));
+  try {
+    const posts = await db
+      .select()
+      .from(schema.posts)
+      .where(eq(schema.posts.calendarId, calendarId))
+      .orderBy(asc(schema.posts.createdAt));
 
-  return posts.map(mapPost);
+    return posts.map(mapPost);
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+
+    const posts = await db
+      .select({
+        id: schema.posts.id,
+        calendarId: schema.posts.calendarId,
+        day: schema.posts.day,
+        platform: schema.posts.platform,
+        tone: schema.posts.tone,
+        title: schema.posts.title,
+        hook: schema.posts.hook,
+        caption: schema.posts.caption,
+        hashtags: schema.posts.hashtags,
+        cta: schema.posts.cta,
+        platformTips: schema.posts.platformTips,
+        videoTips: schema.posts.videoTips,
+        createdAt: schema.posts.createdAt,
+        updatedAt: schema.posts.updatedAt,
+      })
+      .from(schema.posts)
+      .where(eq(schema.posts.calendarId, calendarId))
+      .orderBy(asc(schema.posts.createdAt));
+
+    return posts.map(mapPost);
+  }
+}
+
+async function updatePostThumbnail(input) {
+  try {
+    return await db.transaction(async (tx) => {
+      const [existingPost] = await tx
+        .select({
+          id: schema.posts.id,
+        })
+        .from(schema.posts)
+        .where(
+          and(
+            eq(schema.posts.calendarId, input.calendarId),
+            eq(schema.posts.day, input.day),
+          ),
+        )
+        .limit(1);
+
+      if (!existingPost) {
+        return null;
+      }
+
+      const [updatedPost] = await tx
+        .update(schema.posts)
+        .set({
+          thumbnailPrompt: input.thumbnailPrompt || null,
+          thumbnailMimeType: input.thumbnailMimeType || null,
+          thumbnailBase64: input.thumbnailBase64 || null,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.posts.id, existingPost.id))
+        .returning();
+
+      return mapPost(updatedPost);
+    });
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+
+    return null;
+  }
 }
 
 module.exports = {
@@ -449,5 +584,6 @@ module.exports = {
   listCalendarsByUser,
   listPostsByCalendar,
   listProfilesByUser,
+  updatePostThumbnail,
   updateCalendarTitles,
 };

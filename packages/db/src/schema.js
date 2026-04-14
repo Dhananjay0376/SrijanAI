@@ -53,6 +53,9 @@ const posts = pgTable("posts", {
   cta: text("cta").notNull(),
   platformTips: jsonb("platform_tips").$type("string[]"),
   videoTips: jsonb("video_tips").$type("string[]"),
+  thumbnailPrompt: text("thumbnail_prompt"),
+  thumbnailMimeType: varchar("thumbnail_mime_type", { length: 100 }),
+  thumbnailBase64: text("thumbnail_base64"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });

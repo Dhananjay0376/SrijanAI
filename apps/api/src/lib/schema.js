@@ -80,4 +80,31 @@ function validatePostResponse(payload) {
   return errors;
 }
 
-module.exports = { validateMonthlyResponse, validatePostResponse };
+function validateThumbnailResponse(payload) {
+  const errors = [];
+
+  if (!payload || typeof payload !== "object") {
+    return ["Response must be an object"];
+  }
+
+  if (!payload.thumbnail || typeof payload.thumbnail !== "object") {
+    return ["Response must include thumbnail object"];
+  }
+
+  for (const field of ["mimeType", "base64"]) {
+    const error = assertString(payload.thumbnail[field], `thumbnail.${field}`);
+    if (error) {
+      errors.push(error);
+    }
+  }
+
+  const metaErrors = validateMonthlyResponse({
+    titles: [],
+    meta: payload.meta || null,
+  }).filter((error) => error.includes("meta."));
+  errors.push(...metaErrors);
+
+  return errors;
+}
+
+module.exports = { validateMonthlyResponse, validatePostResponse, validateThumbnailResponse };
