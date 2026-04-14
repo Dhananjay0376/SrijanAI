@@ -15,14 +15,16 @@ const {
   updateCalendarTitles,
 } = require("./modules/calendar");
 const { createPost, getPost, listPostsByCalendar } = require("./modules/posts");
+const { updatePostThumbnail } = require("@srijanai/db");
 const { notFoundHandler } = require("./modules/not-found");
 const { getCorsHeaders, parseJsonBody, sendError, sendJson } = require("./lib/http");
 const { logEvent } = require("./lib/logger");
 const {
   validateMonthlyResponse,
   validatePostResponse,
+  validateThumbnailResponse,
 } = require("./lib/schema");
-const { generateMonthlyTitles, generatePost } = require("./lib/ai/router");
+const { generateMonthlyTitles, generatePost, generateThumbnail } = require("./lib/ai/router");
 const {
   validateCreatorProfile,
   validateCalendar,
@@ -30,6 +32,7 @@ const {
   validatePost,
   validateMonthlyGeneration,
   validatePostGeneration,
+  validateThumbnailGeneration,
 } = require("./lib/validation");
 
 const server = http.createServer(async (req, res) => {
@@ -56,6 +59,19 @@ const server = http.createServer(async (req, res) => {
     }
 
     sendError(res, 500, `Failed to fetch ${entity}`, error.message);
+  };
+
+  const isRecoverablePostPersistenceError = (error) => {
+    const message = String(error?.message || "").toLowerCase();
+
+    return (
+      isDatabaseUnavailable(error) ||
+      message.includes("thumbnail_prompt") ||
+      message.includes("thumbnail_mime_type") ||
+      message.includes("thumbnail_base64") ||
+      (message.includes("column") &&
+        (message.includes("does not exist") || message.includes("doesn't exist")))
+    );
   };
 
   if (req.method === "OPTIONS") {
@@ -395,7 +411,7 @@ const server = http.createServer(async (req, res) => {
                 platformTips: result.platformTips,
               });
             } catch (error) {
-              if (isDatabaseUnavailable(error)) {
+              if (isRecoverablePostPersistenceError(error)) {
                 const now = new Date().toISOString();
                 stored = {
                   id: `generated-${Date.now()}`,
@@ -410,7 +426,7 @@ const server = http.createServer(async (req, res) => {
                   createdAt: now,
                   updatedAt: now,
                 };
-                warning = "Post generated, but it could not be saved because the database is unavailable.";
+                warning = "Post generated, but it could not be saved to the database right now.";
               } else {
                 throw error;
               }
@@ -482,6 +498,77 @@ const server = http.createServer(async (req, res) => {
           return;
         }
         sendError(res, 500, "Failed to generate preview", error.message);
+      });
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/generate/thumbnail") {
+    parseJsonBody(req)
+      .then(async (input) => {
+        const errors = validateThumbnailGeneration(input);
+        if (errors.length > 0) {
+          sendError(res, 400, "Invalid thumbnail generation input", errors);
+          return;
+        }
+
+        try {
+          const result = await generateThumbnail(input);
+          const isPreviewCalendar = String(input.calendarId || "").startsWith("preview-");
+          let thumbnail = {
+            prompt: result.prompt,
+            mimeType: result.mimeType,
+            base64: result.base64,
+          };
+          let warning = null;
+
+          if (!isPreviewCalendar) {
+            try {
+              const storedPost = await updatePostThumbnail({
+                calendarId: input.calendarId,
+                day: input.day,
+                thumbnailPrompt: result.prompt,
+                thumbnailMimeType: result.mimeType,
+                thumbnailBase64: result.base64,
+              });
+
+              if (!storedPost) {
+                warning = "Thumbnail generated, but no saved post was found to attach it to yet.";
+              }
+            } catch (error) {
+              if (isDatabaseUnavailable(error)) {
+                warning = "Thumbnail generated, but it could not be saved because the database is unavailable.";
+              } else {
+                throw error;
+              }
+            }
+          } else {
+            warning = "Thumbnail generated in preview mode and was not saved.";
+          }
+
+          logEvent("generation.thumbnail", {
+            provider: result.meta?.provider,
+            attempts: result.meta?.attempts,
+            durationMs: result.meta?.durationMs,
+            persisted: !warning,
+          });
+
+          const responsePayload = { thumbnail, meta: result.meta, warning };
+          const responseErrors = validateThumbnailResponse(responsePayload);
+          if (responseErrors.length > 0) {
+            sendError(res, 500, "Response schema violation", responseErrors);
+            return;
+          }
+          sendJson(res, 200, responsePayload);
+        } catch (error) {
+          sendError(res, 502, "Thumbnail generation failed", error.message);
+        }
+      })
+      .catch((error) => {
+        if (error?.message?.includes("Unexpected")) {
+          sendError(res, 400, "Invalid JSON body");
+          return;
+        }
+        sendError(res, 500, "Failed to generate thumbnail", error.message);
       });
     return;
   }

@@ -98,4 +98,18 @@ async function generatePost(input) {
   return runWithFallback("post", input);
 }
 
-module.exports = { generateMonthlyTitles, generatePost };
+async function generateThumbnail(input) {
+  const startTime = Date.now();
+  const result = await gemini.generateThumbnail(input);
+
+  return {
+    ...result,
+    meta: {
+      provider: result.provider,
+      attempts: 1,
+      durationMs: Date.now() - startTime,
+    },
+  };
+}
+
+module.exports = { generateMonthlyTitles, generatePost, generateThumbnail };

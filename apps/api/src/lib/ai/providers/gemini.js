@@ -1,6 +1,6 @@
 const { fetchWithRetry } = require("../http");
 const { extractJson } = require("../parse");
-const { buildMonthlyPrompt, buildPostPrompt } = require("../prompts");
+const { buildMonthlyPrompt, buildPostPrompt, buildThumbnailPrompt } = require("../prompts");
 
 function getModel() {
   return process.env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -36,6 +36,43 @@ async function callGemini(prompt) {
     throw new Error("Gemini response was not valid JSON");
   }
   return parsed;
+}
+
+async function callGeminiImage(prompt) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not set");
+  }
+
+  const model = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const response = await fetchWithRetry(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, responseModalities: ["TEXT", "IMAGE"] },
+    }),
+    timeoutMs: 30000,
+    retries: 2,
+  });
+
+  const data = await response.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((part) => part?.inlineData?.data);
+
+  if (!imagePart?.inlineData?.data) {
+    throw new Error("Gemini image response did not include image data");
+  }
+
+  return {
+    prompt,
+    mimeType: imagePart.inlineData.mimeType || "image/png",
+    base64: imagePart.inlineData.data,
+  };
 }
 
 async function generateMonthlyTitles(input) {
@@ -78,9 +115,35 @@ async function generatePostRetry(input, retryPrompt) {
   };
 }
 
+async function generateThumbnail(input) {
+  const prompt = buildThumbnailPrompt(input);
+  let result;
+
+  try {
+    result = await callGeminiImage(prompt);
+  } catch (error) {
+    const message = String(error?.message || "");
+    if (message.includes("429")) {
+      throw new Error(
+        "Gemini image generation is rate-limited or out of free-tier quota right now. Please wait a bit and try again.",
+      );
+    }
+
+    throw error;
+  }
+
+  return {
+    provider: "gemini-image",
+    prompt: result.prompt,
+    mimeType: result.mimeType,
+    base64: result.base64,
+  };
+}
+
 module.exports = {
   generateMonthlyTitles,
   generateMonthlyTitlesRetry,
   generatePost,
   generatePostRetry,
+  generateThumbnail,
 };

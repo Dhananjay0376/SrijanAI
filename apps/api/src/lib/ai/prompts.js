@@ -202,10 +202,40 @@ function buildPostRetryPrompt(input, validationError) {
     .join("\n");
 }
 
+function buildThumbnailPrompt(input) {
+  const normalizedPlatform = String(input.platform || "").toLowerCase();
+  const aspectRatio = normalizedPlatform.includes("youtube") ? "16:9 landscape" : "4:5 portrait";
+  const visualGoal = normalizedPlatform.includes("youtube")
+    ? "Create a high-contrast YouTube thumbnail with clear focal subject, bold composition, cinematic lighting, and room for title text overlay."
+    : "Create a scroll-stopping social media thumbnail with a clear focal subject, bold composition, rich lighting, and visual depth.";
+  const isHinglish = isHinglishLanguage(input.language);
+
+  return [
+    "Generate a single thumbnail image for a social media post.",
+    `Platform: ${input.platform || "Social media"}`,
+    `Tone: ${input.tone || "Engaging"}`,
+    `Language context: ${input.language || "English"}`,
+    `Target aspect ratio: ${aspectRatio}`,
+    visualGoal,
+    isHinglish
+      ? "The thumbnail should feel culturally natural for a Hinglish-speaking audience, modern, energetic, and authentic."
+      : "The thumbnail should feel modern, polished, and native to the target platform.",
+    "Do not include watermarks, logos, app UI, or unreadable tiny text.",
+    "If text is included in the image, keep it minimal, bold, and highly legible.",
+    "Prefer a clean, high-conversion thumbnail composition over abstract art.",
+    `Post title: ${input.title || "Untitled post"}`,
+    `Hook: ${input.hook || ""}`,
+    `Caption summary: ${input.caption || ""}`,
+    `Topic: ${input.topic || input.title || "General creator content"}`,
+    `CTA context: ${input.cta || ""}`,
+  ].join("\n");
+}
+
 module.exports = {
   buildMonthlyPrompt,
   buildPostPrompt,
   buildPostRetryPrompt,
+  buildThumbnailPrompt,
   getCaptionLengthGuide,
   getPlatformPostGuide,
   isHinglishLanguage,
