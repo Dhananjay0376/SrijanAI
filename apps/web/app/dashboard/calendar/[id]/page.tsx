@@ -29,7 +29,13 @@ export default async function CalendarPage({ params }: CalendarPageProps) {
       return notFound();
     }
 
-    const posts = await listPostsByCalendar(id);
+    let posts: Awaited<ReturnType<typeof listPostsByCalendar>> = [];
+    try {
+      posts = await listPostsByCalendar(id);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      posts = [];
+    }
 
     return <GeneratedCalendarPage initialData={calendar} initialPosts={posts} />;
   } catch (error) {

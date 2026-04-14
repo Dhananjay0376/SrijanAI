@@ -14,6 +14,8 @@ type GeneratedPostDetails = {
   cta: string;
   platformTips: string[];
   metaSummary?: string;
+  thumbnailDataUrl?: string;
+  thumbnailPrompt?: string;
 };
 
 type GeneratedCalendarBoardProps = {
@@ -21,10 +23,12 @@ type GeneratedCalendarBoardProps = {
   statuses: Record<string, PostStatus>;
   generatedPosts: Record<string, GeneratedPostDetails>;
   loadingPostDay: string | null;
+  loadingThumbnailDay: string | null;
   errorMessage: string;
   selectedDay: string | null;
   onSetStatus: (isoKey: string, status: PostStatus) => void;
   onGeneratePost: (isoKey: string) => void;
+  onGenerateThumbnail: (isoKey: string) => void;
   onSelectDay: (isoKey: string | null) => void;
 };
 
@@ -35,10 +39,12 @@ export function GeneratedCalendarBoard({
   statuses,
   generatedPosts,
   loadingPostDay,
+  loadingThumbnailDay,
   errorMessage,
   selectedDay,
   onSetStatus,
   onGeneratePost,
+  onGenerateThumbnail,
   onSelectDay,
 }: GeneratedCalendarBoardProps) {
   const monthStart = new Date(data.year, new Date(`${data.month} 1, ${data.year}`).getMonth(), 1);
@@ -114,6 +120,7 @@ export function GeneratedCalendarBoard({
           const scheduled = titleMap.get(cell.isoKey);
           const status = statuses[cell.isoKey] ?? "pending";
           const isLoading = loadingPostDay === cell.isoKey;
+          const isThumbnailLoading = loadingThumbnailDay === cell.isoKey;
 
           return (
             <div
@@ -202,6 +209,7 @@ export function GeneratedCalendarBoard({
         (() => {
           const selectedEntry = titleMap.get(selectedDay);
           const fullPost = generatedPosts[selectedDay];
+          const isThumbnailLoading = loadingThumbnailDay === selectedDay;
 
           if (!selectedEntry) {
             return null;
@@ -263,6 +271,35 @@ export function GeneratedCalendarBoard({
                           {fullPost.platformTips.map((tip) => (
                             <span key={tip} className="post-tip">{tip}</span>
                           ))}
+                        </div>
+                      </div>
+                      <div className="post-detail-section">
+                        <p className="detail-label">Thumbnail</p>
+                        {fullPost.thumbnailDataUrl ? (
+                          <img
+                            src={fullPost.thumbnailDataUrl}
+                            alt={`Generated thumbnail for ${selectedEntry.title}`}
+                            className="generated-thumbnail-image"
+                          />
+                        ) : (
+                          <p className="detail-text">
+                            No thumbnail yet. Generate one for this post below.
+                          </p>
+                        )}
+                        <div className="generated-day-actions">
+                          <button
+                            type="button"
+                            className="generated-action-button is-generate"
+                            onClick={() => onGenerateThumbnail(selectedDay)}
+                            disabled={isThumbnailLoading}
+                          >
+                            {isThumbnailLoading ? (
+                              <Loader2 className="studio-spin" size={13} />
+                            ) : (
+                              <Sparkles size={13} />
+                            )}
+                            {fullPost.thumbnailDataUrl ? "Regenerate Thumbnail" : "Generate Thumbnail"}
+                          </button>
                         </div>
                       </div>
                       {fullPost.metaSummary ? (

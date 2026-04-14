@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GlassCard } from "../ui/GlassCard";
-import { generateMonthlyCalendar, generatePostDetails, listPostsByCalendar } from "../../lib/api";
+import {
+  generateMonthlyCalendar,
+  generatePostDetails,
+  generateThumbnail,
+  listPostsByCalendar,
+} from "../../lib/api";
 import {
   buildSchedulePreviewForMonth,
   inferScheduleDistributionFromDates,
@@ -22,6 +27,8 @@ type GeneratedPostDetailsState = {
   cta: string;
   platformTips: string[];
   metaSummary?: string;
+  thumbnailDataUrl?: string;
+  thumbnailPrompt?: string;
 };
 
 const GENERATED_CALENDAR_STORAGE_KEY = "srijanai.generated-calendar";
@@ -75,11 +82,15 @@ export function GeneratedCalendarPage({
     hashtags: string[];
     cta: string;
     platformTips: string[];
+    thumbnailPrompt?: string | null;
+    thumbnailMimeType?: string | null;
+    thumbnailBase64?: string | null;
   }>;
 }) {
   const router = useRouter();
   const [data, setData] = useState<ScheduleGenerationState | null>(null);
   const [loadingPostDay, setLoadingPostDay] = useState<string | null>(null);
+  const [loadingThumbnailDay, setLoadingThumbnailDay] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [statuses, setStatuses] = useState<Record<string, PostStatus>>({});
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -96,6 +107,9 @@ export function GeneratedCalendarPage({
     hashtags: string[];
     cta: string;
     platformTips: string[];
+    thumbnailPrompt?: string | null;
+    thumbnailMimeType?: string | null;
+    thumbnailBase64?: string | null;
   }) => ({
     title: post.title,
     hook: post.hook,
@@ -103,6 +117,11 @@ export function GeneratedCalendarPage({
     hashtags: post.hashtags,
     cta: post.cta,
     platformTips: post.platformTips,
+    thumbnailPrompt: post.thumbnailPrompt || undefined,
+    thumbnailDataUrl:
+      post.thumbnailMimeType && post.thumbnailBase64
+        ? `data:${post.thumbnailMimeType};base64,${post.thumbnailBase64}`
+        : undefined,
   });
 
   useEffect(() => {
@@ -271,6 +290,7 @@ export function GeneratedCalendarPage({
       setGeneratedPosts((current) => ({
         ...current,
         [isoKey]: {
+          ...current[isoKey],
           title: result.post.title,
           hook: result.post.hook,
           caption: result.post.caption,
@@ -394,6 +414,58 @@ export function GeneratedCalendarPage({
     }
   }
 
+  async function handleGenerateThumbnail(isoKey: string) {
+    if (!data) {
+      return;
+    }
+
+    const fullPost = generatedPosts[isoKey];
+    if (!fullPost) {
+      setErrorMessage("Generate the full post first, then create its thumbnail.");
+      return;
+    }
+
+    setSelectedDay(isoKey);
+    setLoadingThumbnailDay(isoKey);
+    setErrorMessage("");
+
+    try {
+      const result = await generateThumbnail({
+        calendarId: initialData?.id || `preview-${data.month}-${data.year}`,
+        day: isoKey,
+        platform: data.platform,
+        tone: data.tone,
+        language: data.language,
+        title: fullPost.title,
+        hook: fullPost.hook,
+        caption: fullPost.caption,
+        cta: fullPost.cta,
+        topic: data.niche,
+      });
+
+      const thumbnailDataUrl = `data:${result.thumbnail.mimeType};base64,${result.thumbnail.base64}`;
+      setGeneratedPosts((current) => ({
+        ...current,
+        [isoKey]: {
+          ...current[isoKey],
+          thumbnailDataUrl,
+          thumbnailPrompt: result.thumbnail.prompt,
+          metaSummary: result.warning
+            ? result.meta?.provider
+              ? `Generated with ${result.meta.provider}${typeof result.meta.durationMs === "number" ? ` in ${result.meta.durationMs}ms` : ""}. ${result.warning}`
+              : result.warning
+            : current[isoKey]?.metaSummary,
+        },
+      }));
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to generate the thumbnail right now.",
+      );
+    } finally {
+      setLoadingThumbnailDay(null);
+    }
+  }
+
   if (!data) {
     return (
       <main className="studio-shell">
@@ -490,8 +562,10 @@ export function GeneratedCalendarPage({
         errorMessage={errorMessage}
         generatedPosts={generatedPosts}
         loadingPostDay={loadingPostDay}
+        loadingThumbnailDay={loadingThumbnailDay}
         onSelectDay={setSelectedDay}
         onGeneratePost={handleGeneratePost}
+        onGenerateThumbnail={handleGenerateThumbnail}
         onSetStatus={(isoKey, status) =>
           setStatuses((current) => ({
             ...current,
